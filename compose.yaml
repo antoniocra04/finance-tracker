@@ -1,0 +1,30 @@
+services:
+  svod:
+    build: .
+    restart: unless-stopped
+    init: true
+    ports:
+      - "${BIND_ADDRESS:-127.0.0.1}:${PORT:-3000}:3000"
+    environment:
+      BOOTSTRAP_TOKEN: ${BOOTSTRAP_TOKEN:-}
+      SECURE_COOKIE: ${SECURE_COOKIE:-false}
+      APP_ORIGIN: ${APP_ORIGIN:-}
+      TZ: Europe/Moscow
+    volumes:
+      - svod-data:/app/data
+      - ./backups:/app/backups
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    read_only: true
+    tmpfs:
+      - /tmp
+    mem_limit: 256m
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+volumes:
+  svod-data:
