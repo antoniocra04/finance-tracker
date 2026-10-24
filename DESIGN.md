@@ -25,3 +25,11 @@ Authentication is a single centered 360px column on white: small brand, task hea
 ## States
 
 Explicit empty, loading, stale rate, missing conversion, validation, saving and failure states. Motion only for interaction feedback, 160ms, disabled under reduced-motion preference.
+
+## Controls and responsive details
+
+Shared inputs and selects are 44px high with 8px corners. Native selects reserve 40px at the trailing edge for a consistent chevron; mobile control text is 16px. Toolbar controls have no top margin, and search icons align to the input's center. Compact desktop row actions are 36px; mobile targets are at least 44px.
+
+Dialogs keep their heading and action footer visible while the body scrolls. Footer submit buttons stay associated with their form. Busy labels preserve button dimensions; validation messages scroll into view with 16px clearance. On phones, currency and account type occupy separate full-width rows.
+
+Mobile account rows show the full name, then the balance and conversion underneath, with actions beside them. Search and sorting stack below 380px. The journal stacks amounts below the entry instead of squeezing three columns. Icon-only tablet navigation retains accessible names. Settings always provide logout, including when the sidebar footer is hidden.

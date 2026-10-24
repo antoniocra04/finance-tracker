@@ -74,6 +74,9 @@ function empty(title, text, action = true) {
 }
 
 function renderAuth(initialized) {
+  clearTimeout(toast.timer);
+  document.querySelector('#toast').textContent = '';
+  document.querySelector('#toast').className = '';
   document.title = `${initialized ? 'Вход' : 'Настройка доступа'} · Свод`;
   root.innerHTML = `<main class="auth-layout">
     <section class="auth-panel" aria-labelledby="auth-title">
@@ -105,11 +108,11 @@ function rateStatus() {
 }
 
 function shell(content) {
-  return `<aside class="sidebar"><a href="#overview" class="brand"><img src="/icon.svg" alt="" width="33" height="33">свод<span class="brand-dot">/</span></a><div class="workspace-label">Личные финансы</div><nav aria-label="Основная навигация">${navItems.map(([id, label]) => `<a href="#${id}" class="nav-item ${state.page === id ? 'active' : ''}" ${state.page === id ? 'aria-current="page"' : ''}>${icon(id)}<span>${label}</span></a>`).join('')}</nav><div class="sidebar-bottom"><div class="private-note">${icon('lock')}Личное пространство</div><button class="nav-item" data-action="logout">${icon('logout')}<span>Выйти</span></button><span class="version">Свод / 1.0</span></div></aside><div class="app-main"><header class="topbar"><span class="breadcrumb">Моё пространство <span>/</span> <strong>${navItems.find(([id]) => id === state.page)?.[1] ?? 'Обзор'}</strong></span><div class="topbar-actions">${rateStatus()}<button class="icon-button" data-action="privacy" aria-label="${state.hidden ? 'Показать' : 'Скрыть'} суммы" aria-pressed="${state.hidden}" title="${state.hidden ? 'Показать' : 'Скрыть'} суммы">${icon('eye')}</button><span class="avatar" title="Личное пространство">Я</span></div></header><main id="main-content" class="content">${content}<footer class="page-footer"><span>Свод · Всё складывается</span><a href="https://www.exchangerate-api.com" target="_blank" rel="noreferrer">Rates By Exchange Rate API ${icon('arrow')}</a></footer></main></div>`;
+  return `<aside class="sidebar"><a href="#overview" class="brand" aria-label="Свод — обзор"><img src="/icon.svg" alt="" width="33" height="33">свод<span class="brand-dot">/</span></a><div class="workspace-label">Личные финансы</div><nav aria-label="Основная навигация">${navItems.map(([id, label]) => `<a href="#${id}" class="nav-item ${state.page === id ? 'active' : ''}" aria-label="${label}" ${state.page === id ? 'aria-current="page"' : ''}>${icon(id)}<span>${label}</span></a>`).join('')}</nav><div class="sidebar-bottom"><div class="private-note">${icon('lock')}Личное пространство</div><button class="nav-item" data-action="logout" aria-label="Выйти">${icon('logout')}<span>Выйти</span></button><span class="version">Свод / 1.0</span></div></aside><div class="app-main"><header class="topbar"><span class="breadcrumb">Моё пространство <span>/</span> <strong>${navItems.find(([id]) => id === state.page)?.[1] ?? 'Обзор'}</strong></span><div class="topbar-actions">${rateStatus()}<button class="icon-button" data-action="privacy" aria-label="${state.hidden ? 'Показать' : 'Скрыть'} суммы" aria-pressed="${state.hidden}" title="${state.hidden ? 'Показать' : 'Скрыть'} суммы">${icon('eye')}</button><span class="avatar" title="Личное пространство">Я</span></div></header><main id="main-content" class="content">${content}<footer class="page-footer"><span>Свод · Всё складывается</span><a href="https://www.exchangerate-api.com" target="_blank" rel="noreferrer">Rates By Exchange Rate API ${icon('arrow')}</a></footer></main></div>`;
 }
 
 function heading(title, subtitle, action = true) {
-  return `<div class="page-heading"><div><h1>${title}</h1><p>${subtitle}</p></div>${action ? `<button class="button primary" data-action="add">${icon('plus')}Добавить счёт</button>` : ''}</div>`;
+  return `<div class="page-heading"><div><h1>${title}</h1><p>${subtitle}</p></div>${action ? `<button class="button primary" data-action="add" aria-label="Добавить счёт">${icon('plus')}Добавить счёт</button>` : ''}</div>`;
 }
 
 function warning() {
@@ -122,7 +125,7 @@ function warning() {
 function capitalSummary() {
   const data = state.data;
   const start = data.history[0]?.date;
-  return `<section class="capital-summary" aria-label="Общий капитал"><div class="total-block"><div class="total-label">Общий капитал <button class="currency-switch" data-action="base" title="Сменить основную валюту">${data.base}<span>⌄</span></button></div><div class="total-value">${money(data.total)}</div><div class="total-change ${data.change.total < 0 ? 'negative' : ''}">${data.change.total !== null ? `${icon(data.change.total < 0 ? 'analytics' : 'arrow')}<strong>${signed(data.change.total)}</strong><span>${start ? `с ${dateLabel(start)}` : 'за время наблюдений'}</span>` : '<span>История появится по мере наблюдений</span>'}</div></div><div class="summary-facts"><div><span>На счетах</span><strong>${data.accounts.length}<small>${data.accounts.length === 1 ? 'счёт' : data.accounts.length < 5 ? 'счёта' : 'счетов'}</small></strong></div><div><span>Валютах</span><strong>${data.currencies.length}<small>${data.currencies.map(row => row.currency).join(' / ') || 'пока нет'}</small></strong></div></div></section>`;
+  return `<section class="capital-summary" aria-label="Общий капитал"><div class="total-block"><div class="total-label">Общий капитал <button class="currency-switch" data-action="base" title="Сменить основную валюту">${data.base}<span>⌄</span></button></div><div class="total-value">${money(data.total)}</div><div class="total-change ${data.change.total < 0 ? 'negative' : ''}">${data.change.total !== null ? `${icon(data.change.total < 0 ? 'analytics' : 'arrow')}<strong>${signed(data.change.total)}</strong><span>${start ? `с ${dateLabel(start)}` : 'за время наблюдений'}</span>` : '<span>История появится по мере наблюдений</span>'}</div></div><div class="summary-facts"><div><span>На счетах</span><strong>${data.accounts.length}<small>${plural(data.accounts.length, ['счёт', 'счёта', 'счетов'])}</small></strong></div><div><span>Валютах</span><strong>${data.currencies.length}<small>${data.currencies.map(row => row.currency).join(' / ') || 'пока нет'}</small></strong></div></div></section>`;
 }
 
 function chart() {
@@ -169,7 +172,7 @@ function allocation() {
     const segment = `<circle class="donut-segment color-stroke-${index % 6}" cx="90" cy="90" r="66" pathLength="100" stroke-dasharray="${share} ${100 - share}" stroke-dashoffset="${-offset}"/>`;
     offset += share; return segment;
   }).join('');
-  return `<section class="allocation-section"><div class="section-heading"><h2>Валюты капитала</h2>${icon('globe')}</div><div class="donut-wrap"><svg viewBox="0 0 180 180" class="donut" role="img" aria-label="Распределение капитала по валютам"><circle class="donut-track" cx="90" cy="90" r="66"/>${state.hidden ? '' : segments}</svg><div class="donut-center"><strong>${data.currencies.length}</strong><span>${data.currencies.length === 1 ? 'валюта' : 'валюты'}</span></div></div><div class="allocation-legend">${data.currencies.map((row, index) => `<div><span class="legend-dot color-${index % 6}"></span><strong>${row.currency}</strong><span>${state.hidden ? '•••' : data.total > 0 && row.value !== null ? `${Math.round(row.value / data.total * 100)}%` : '—'}</span><b>${money(row.value, data.base, true)}</b></div>`).join('') || '<p class="subtle">Здесь появится доля каждой валюты.</p>'}</div></section>`;
+  return `<section class="allocation-section"><div class="section-heading"><h2>Валюты капитала</h2>${icon('globe')}</div><div class="donut-wrap"><svg viewBox="0 0 180 180" class="donut" role="img" aria-label="Распределение капитала по валютам"><circle class="donut-track" cx="90" cy="90" r="66"/>${state.hidden ? '' : segments}</svg><div class="donut-center"><strong>${data.currencies.length}</strong><span>${plural(data.currencies.length, ['валюта', 'валюты', 'валют'])}</span></div></div><div class="allocation-legend">${data.currencies.map((row, index) => `<div><span class="legend-dot color-${index % 6}"></span><strong>${row.currency}</strong><span>${state.hidden ? '•••' : data.total > 0 && row.value !== null ? `${Math.round(row.value / data.total * 100)}%` : '—'}</span><b>${money(row.value, data.base, true)}</b></div>`).join('') || '<p class="subtle">Здесь появится доля каждой валюты.</p>'}</div></section>`;
 }
 
 function accountRows(accounts) {
@@ -204,11 +207,39 @@ function journal() {
 
 function settings() {
   const data = state.data;
-  return `${heading('Настройки', 'Ваши валюты, доступ и сохранность данных.', false)}<div class="settings-list"><section class="settings-section"><div><h2>Основная валюта</h2><p>В ней показываем общий капитал и аналитику. Остатки счетов хранятся в исходных валютах.</p></div><form id="base-form"><label>Валюта отчёта<select name="base">${currencyOptions(data.base)}</select></label><p class="form-error" role="alert"></p><button class="button primary">Сохранить</button></form></section><section class="settings-section"><div><h2>Курсы валют</h2><p>Обновляются раз в сутки. Если интернет недоступен, используем сохранённый курс с указанием даты.</p></div><div>${rateStatus()}<p class="subtle">${data.rates ? `Следующая публикация провайдера: ${escape(data.rates.nextUpdate ? fullDate(data.rates.nextUpdate) : 'в течение суток')}` : 'Курсы ещё не загружены.'}</p><button class="button secondary" data-action="refresh">${icon('refresh')}Проверить курсы</button></div></section><section class="settings-section"><div><h2>Пароль</h2><p>После смены пароля все сессии завершатся. Потребуется войти заново.</p></div><form id="password-form"><label>Текущий пароль<input name="current" type="password" autocomplete="current-password" required></label><label>Новый пароль<input name="password" type="password" minlength="12" maxlength="256" autocomplete="new-password" required placeholder="Не меньше 12 символов"></label><label>Повторите новый пароль<input name="confirm" type="password" minlength="12" autocomplete="new-password" required></label><p class="form-error" role="alert"></p><button class="button secondary">Изменить пароль</button></form></section><section class="settings-section"><div><h2>Ваши данные</h2><p>JSON содержит счета, историю остатков и курсы. Полную резервную копию базы можно создать командой из README.</p></div><div class="export-buttons"><button class="button secondary" data-action="export">${icon('download')}Экспорт JSON</button><button class="button secondary" data-action="csv">${icon('download')}История в CSV</button><small>Экспорты содержат финансовые данные без пароля.</small></div></section>${data.archived.length ? `<section class="settings-section"><div><h2>Архив счетов</h2><p>Архивные счета исключены из текущего капитала, но остались в истории и экспорте.</p></div><div class="archived-list">${data.archived.map(account => `<div><strong>${escape(account.name)}</strong><span>${account.currency} · ${dateLabel(account.archived_at, true)}</span></div>`).join('')}</div></section>` : ''}</div>`;
+  return `${heading('Настройки', 'Ваши валюты, доступ и сохранность данных.', false)}
+    <div class="settings-list">
+      <section class="settings-section">
+        <div><h2>Основная валюта</h2><p>В ней показываем общий капитал и аналитику. Остатки счетов хранятся в исходных валютах.</p></div>
+        <form id="base-form"><label>Валюта отчёта<select name="base">${currencyOptions(data.base)}</select></label><p class="form-error" role="alert"></p><button class="button primary">Сохранить</button></form>
+      </section>
+      <section class="settings-section">
+        <div><h2>Курсы валют</h2><p>Обновляются раз в сутки. Если интернет недоступен, используем сохранённый курс с указанием даты.</p></div>
+        <div>${rateStatus()}<p class="subtle">${data.rates ? `Следующая публикация провайдера: ${escape(data.rates.nextUpdate ? fullDate(data.rates.nextUpdate) : 'в течение суток')}` : 'Курсы ещё не загружены.'}</p><button class="button secondary" data-action="refresh">${icon('refresh')}Проверить курсы</button></div>
+      </section>
+      <section class="settings-section">
+        <div><h2>Пароль</h2><p>После смены пароля все сессии завершатся. Потребуется войти заново.</p></div>
+        <form id="password-form"><label>Текущий пароль<input name="current" type="password" autocomplete="current-password" required></label><label>Новый пароль<input name="password" type="password" minlength="12" maxlength="256" autocomplete="new-password" required placeholder="Не меньше 12 символов"></label><label>Повторите новый пароль<input name="confirm" type="password" minlength="12" maxlength="256" autocomplete="new-password" required></label><p class="form-error" role="alert"></p><button class="button secondary">Изменить пароль</button></form>
+      </section>
+      <section class="settings-section">
+        <div><h2>Ваши данные</h2><p>JSON содержит счета, историю остатков и курсы. Полную резервную копию базы можно создать командой из README.</p></div>
+        <div class="export-buttons"><button class="button secondary" data-action="export">${icon('download')}Экспорт JSON</button><button class="button secondary" data-action="csv">${icon('download')}История в CSV</button><small>Экспорты содержат финансовые данные без пароля.</small></div>
+      </section>
+      ${data.archived.length ? `<section class="settings-section"><div><h2>Архив счетов</h2><p>Архивные счета исключены из текущего капитала, но остались в истории и экспорте.</p></div><div class="archived-list">${data.archived.map(account => `<div><strong>${escape(account.name)}</strong><span>${account.currency} · ${dateLabel(account.archived_at, true)}</span></div>`).join('')}</div></section>` : ''}
+      <section class="settings-section">
+        <div><h2>Текущая сессия</h2><p>Завершите вход на этом устройстве. Счета и история сохранятся.</p></div>
+        <div><button class="button secondary" data-action="logout">${icon('logout')}Выйти из Свода</button></div>
+      </section>
+    </div>`;
 }
 
 function render() {
   if (!state.data) return;
+  const focused = document.activeElement;
+  const focusAction = focused?.dataset?.action;
+  const focusId = focused?.id;
+  const focusPeriod = focused?.dataset?.period;
+  const focusAccount = focused?.dataset?.id;
   if (!navItems.some(([id]) => id === state.page)) state.page = 'overview';
   const data = state.data;
   document.title = `${navItems.find(([id]) => id === state.page)[1]} · Свод`;
@@ -219,16 +250,26 @@ function render() {
   if (state.page === 'history') content = journal();
   if (state.page === 'settings') content = settings();
   root.innerHTML = shell(content);
+  if (focusAction) {
+    const selector = `[data-action="${CSS.escape(focusAction)}"]${focusPeriod ? `[data-period="${CSS.escape(focusPeriod)}"]` : ''}${focusAccount ? `[data-id="${CSS.escape(focusAccount)}"]` : ''}`;
+    root.querySelector(selector)?.focus({ preventScroll: true });
+  } else if (focusId) document.getElementById(focusId)?.focus({ preventScroll: true });
 }
 
 function showDialog(title, content) {
-  dialog.innerHTML = `<div class="dialog-heading"><h2 id="dialog-title">${title}</h2><button class="icon-button" data-action="close" aria-label="Закрыть">${icon('close')}</button></div>${content}`;
+  dialog.innerHTML = `<div class="dialog-heading"><h2 id="dialog-title">${title}</h2><button class="icon-button" data-action="close" aria-label="Закрыть">${icon('close')}</button></div><div class="dialog-body">${content}</div>`;
+  const footer = dialog.querySelector('.dialog-footer');
+  if (footer) {
+    const form = footer.closest('form');
+    if (form) for (const button of footer.querySelectorAll('button:not([type]), button[type="submit"]')) button.setAttribute('form', form.id);
+    dialog.append(footer);
+  }
   dialog.showModal();
 }
 
 function amountFields(account) {
-  const digits = account ? new Intl.NumberFormat('ru', { style: 'currency', currency: account.currency }).resolvedOptions().maximumFractionDigits : 2;
-  return `<label>Остаток${account ? `, ${account.currency}` : ''}<input name="amount" inputmode="decimal" type="text" required autocomplete="off" placeholder="0${digits ? `,${'0'.repeat(digits)}` : ''}" value="${account ? account.amount : ''}"></label><label>На дату<input name="date" type="date" min="2000-01-01" max="${today()}" value="${today()}" required></label><label>Заметка <span class="optional">необязательно</span><input name="note" maxlength="500" placeholder="Например, после зарплаты"></label>`;
+  const digits = new Intl.NumberFormat('ru', { style: 'currency', currency: account?.currency ?? state.data.base }).resolvedOptions().maximumFractionDigits;
+  return `<label><span class="amount-label">Остаток, ${account?.currency ?? state.data.base}</span><input name="amount" inputmode="decimal" type="text" required autocomplete="off" placeholder="0${digits ? `,${'0'.repeat(digits)}` : ''}" value="${account ? account.amount : ''}"></label><label>На дату<input name="date" type="date" min="2000-01-01" max="${today()}" value="${today()}" required></label><label>Заметка <span class="optional">необязательно</span><input name="note" maxlength="500" placeholder="Например, после зарплаты"></label>`;
 }
 
 function addDialog() {
@@ -293,10 +334,13 @@ document.addEventListener('submit', async event => {
   event.preventDefault();
   const body = Object.fromEntries(new FormData(form));
   const errorElement = form.querySelector('.form-error');
-  const submit = form.querySelector('button[type="submit"], button:not([type])');
+  const submit = event.submitter ?? [...form.elements].find(element => element.type === 'submit');
+  const submitLabel = submit.innerHTML;
   errorElement.textContent = '';
-  if (body.confirm !== undefined && body.confirm !== body.password) { errorElement.textContent = 'Пароли не совпадают'; return; }
+  if (body.confirm !== undefined && body.confirm !== body.password) { errorElement.textContent = 'Пароли не совпадают'; errorElement.scrollIntoView({ block: 'nearest' }); return; }
   submit.disabled = true; form.setAttribute('aria-busy', 'true');
+  submit.setAttribute('aria-busy', 'true');
+  submit.innerHTML = `<span class="button-label">${submitLabel}</span><span class="button-pending">${form.id === 'auth-form' ? 'Открываем…' : 'Сохраняем…'}</span>`;
   try {
     if (form.id === 'auth-form') { await api(form.dataset.initialized === 'true' ? '/login' : '/setup', { method: 'POST', body }); await load(); }
     if (form.id === 'account-form') { await api('/accounts', { method: 'POST', body }); dialog.close(); await load(); toast('Счёт добавлен'); }
@@ -304,8 +348,8 @@ document.addEventListener('submit', async event => {
     if (form.id === 'edit-form') { await api(`/accounts/${form.dataset.id}`, { method: 'PATCH', body }); dialog.close(); await load(); toast('Счёт обновлён'); }
     if (form.id === 'base-form') { await api('/settings', { method: 'PUT', body }); await load(); toast('Основная валюта изменена'); }
     if (form.id === 'password-form') { await api('/password', { method: 'PUT', body }); state.data = null; renderAuth(true); toast('Пароль изменён. Войдите снова.'); }
-  } catch (error) { errorElement.textContent = error.message; }
-  finally { submit.disabled = false; form.removeAttribute('aria-busy'); }
+  } catch (error) { errorElement.textContent = error.message; errorElement.scrollIntoView({ block: 'nearest' }); }
+  finally { submit.disabled = false; submit.innerHTML = submitLabel; submit.removeAttribute('aria-busy'); form.removeAttribute('aria-busy'); }
 });
 
 document.addEventListener('input', event => {
@@ -316,9 +360,15 @@ document.addEventListener('input', event => {
 });
 document.addEventListener('change', event => {
   if (event.target.id === 'account-sort') { state.sort = event.target.value; render(); }
+  if (event.target.matches('#account-form [name="currency"]')) {
+    const currency = event.target.value;
+    const digits = new Intl.NumberFormat('ru', { style: 'currency', currency }).resolvedOptions().maximumFractionDigits;
+    dialog.querySelector('.amount-label').textContent = `Остаток, ${currency}`;
+    dialog.querySelector('[name="amount"]').placeholder = `0${digits ? `,${'0'.repeat(digits)}` : ''}`;
+  }
 });
 window.addEventListener('hashchange', () => { state.page = location.hash.slice(1) || 'overview'; state.search = ''; render(); window.scrollTo(0, 0); });
-window.matchMedia('(max-width: 580px)').addEventListener('change', () => { if (!dialog.open) render(); });
+window.matchMedia('(max-width: 580px)').addEventListener('change', () => { render(); });
 dialog.addEventListener('click', event => {
   const rect = dialog.getBoundingClientRect();
   if (event.target === dialog && (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom)) dialog.close();
