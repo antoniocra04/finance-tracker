@@ -1,29 +1,29 @@
 const root = document.querySelector('#app');
 const dialog = document.querySelector('#dialog');
 const paths = {
-  overview: '<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',
-  accounts: '<rect x="3" y="5" width="18" height="14" rx="3"/><path d="M3 10h18m-13 5h3"/>',
-  analytics: '<path d="M4 20V11m8 9V4m8 16v-7"/>',
-  history: '<path d="M3 11a9 9 0 1 1 2 7M3 4v7h7m2-4v5l3 2"/>',
-  settings: '<path d="M4 7h16M4 17h16"/><circle cx="9" cy="7" r="3"/><circle cx="15" cy="17" r="3"/>',
-  plus: '<path d="M12 5v14M5 12h14"/>',
-  arrow: '<path d="m7 17 10-10M7 7h10v10"/>',
-  chevron: '<path d="m9 5 7 7-7 7"/>',
-  eye: '<path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/>',
-  lock: '<rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3m-4 5v2"/>',
-  logout: '<path d="M9 4H5v16h4m6-13 5 5-5 5m-5-5h10"/>',
-  refresh: '<path d="M20 10a8 8 0 0 0-14-5L3 8m0-5v5h5m-4 6a8 8 0 0 0 14 5l3-3m0 5v-5h-5"/>',
-  download: '<path d="M12 3v12m-5-5 5 5 5-5M4 16v5h16v-5"/>',
-  close: '<path d="m6 6 12 12M18 6 6 18"/>',
-  check: '<path d="m5 12 4 4L19 6"/>',
-  wallet: '<path d="M19 8V5H5a2 2 0 0 0 0 4h15v11H5a2 2 0 0 1-2-2V7m17 6h-5v4h5"/>',
-  search: '<circle cx="10" cy="10" r="6"/><path d="m15 15 5 5"/>',
-  archive: '<rect x="3" y="3" width="18" height="4" rx="1"/><path d="M5 7v14h14V7m-10 5h6"/>',
-  edit: '<path d="m15 4 5 5M4 20l5-1L21 7l-5-5L4 14v6Z"/>',
-  globe: '<circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/>',
-  info: '<circle cx="12" cy="12" r="9"/><path d="M12 11v6m0-10v1"/>'
+  overview: '<rect width="7" height="9" x="3" y="3" rx="1" /><rect width="7" height="5" x="14" y="3" rx="1" /><rect width="7" height="9" x="14" y="12" rx="1" /><rect width="7" height="5" x="3" y="16" rx="1" />',
+  accounts: '<path d="M3 11h3.75a2 2 0 0 1 1.6.8l.45.6a4 4 0 0 0 6.4 0l.45-.6a2 2 0 0 1 1.6-.8H21" /><path d="M3 7h18" /><rect x="3" y="3" width="18" height="18" rx="2" />',
+  analytics: '<path d="M5 21v-6" /><path d="M12 21V9" /><path d="M19 21V3" />',
+  history: '<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" /><path d="M12 7v5l4 2" />',
+  settings: '<path d="M10 5H3" /><path d="M12 19H3" /><path d="M14 3v4" /><path d="M16 17v4" /><path d="M21 12h-9" /><path d="M21 19h-5" /><path d="M21 5h-7" /><path d="M8 10v4" /><path d="M8 12H3" />',
+  plus: '<path d="M5 12h14" /><path d="M12 5v14" />',
+  arrow: '<path d="M7 7h10v10" /><path d="M7 17 17 7" />',
+  arrowDown: '<path d="m7 7 10 10" /><path d="M17 7v10H7" />',
+  chevron: '<path d="m6 9 6 6 6-6" />',
+  chevronRight: '<path d="m9 18 6-6-6-6" />',
+  eye: '<path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0" /><circle cx="12" cy="12" r="3" />',
+  eyeOff: '<path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49" /><path d="M14.084 14.158a3 3 0 0 1-4.242-4.242" /><path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143" /><path d="m2 2 20 20" />',
+  logout: '<path d="m16 17 5-5-5-5" /><path d="M21 12H9" /><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />',
+  refresh: '<path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" /><path d="M21 3v5h-5" /><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" /><path d="M8 16H3v5" />',
+  download: '<path d="M12 15V3" /><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><path d="m7 10 5 5 5-5" />',
+  close: '<path d="M18 6 6 18" /><path d="m6 6 12 12" />',
+  wallet: '<path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1" /><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4" />',
+  search: '<path d="m21 21-4.34-4.34" /><circle cx="11" cy="11" r="8" />',
+  archive: '<rect width="20" height="5" x="2" y="3" rx="1" /><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8" /><path d="M10 12h4" />',
+  edit: '<path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.375 2.625a1 1 0 0 1 3 3l-9.013 9.014a2 2 0 0 1-.853.505l-2.873.84a.5.5 0 0 1-.62-.62l.84-2.873a2 2 0 0 1 .506-.852z" />',
+  info: '<circle cx="12" cy="12" r="10" /><path d="M12 16v-4" /><path d="M12 8h.01" />'
 };
-const icon = (name, className = '') => `<svg class="icon ${className}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[name] ?? paths.wallet}</svg>`;
+const icon = (name, className = '') => `<svg class="icon ${className}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${paths[name] ?? paths.wallet}</svg>`;
 const escape = value => String(value ?? '').replace(/[&<>"']/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[character]));
 const today = () => new Date().toISOString().slice(0, 10);
 const dateLabel = (date, year = false) => new Intl.DateTimeFormat('ru', { day: 'numeric', month: 'short', ...(year ? { year: 'numeric' } : {}), timeZone: 'UTC' }).format(new Date(`${date.slice(0, 10)}T12:00:00Z`));
@@ -83,14 +83,13 @@ function renderAuth(initialized) {
       <a href="/" class="brand" aria-label="Свод"><img src="/icon.svg" alt="" width="36" height="36">свод</a>
       <form id="auth-form" class="auth-form" data-initialized="${initialized}">
         <h1 id="auth-title">${initialized ? 'Вход' : 'Настройка доступа'}</h1>
-        <p class="auth-description">${initialized ? 'Введите пароль, чтобы открыть свои счета.' : 'Задайте пароль для своего Свода. Это нужно только при первом запуске.'}</p>
+        ${initialized ? '' : '<p class="auth-description">Задайте пароль для входа.</p>'}
         ${!initialized ? `<label>Код установки<input name="token" required autocomplete="off" spellcheck="false" autocapitalize="none" aria-describedby="setup-code-help" placeholder="Из журнала запуска сервера" autofocus><small id="setup-code-help">Код показан при запуске сервера. Он нужен один раз.</small></label>` : ''}
         <label>Пароль<input name="password" type="password" minlength="${initialized ? 1 : 12}" maxlength="256" required autocomplete="${initialized ? 'current-password' : 'new-password'}" ${initialized ? 'autofocus' : 'aria-describedby="password-help"'}>${!initialized ? '<small id="password-help">Не меньше 12 символов.</small>' : ''}</label>
         ${!initialized ? '<label>Повторите пароль<input name="confirm" type="password" minlength="12" maxlength="256" required autocomplete="new-password"></label>' : ''}
         <p class="form-error" role="alert"></p>
         <button type="submit" class="button primary wide">${initialized ? 'Войти' : 'Сохранить пароль'}</button>
       </form>
-      <p class="auth-note">${icon('lock')}<span>${initialized ? 'Личный Свод на вашем сервере.' : 'После настройки для входа понадобится только пароль.'}</span></p>
     </section>
   </main>`;
 }
@@ -101,18 +100,25 @@ async function load() {
   render();
 }
 
-function rateStatus() {
+function rateStatus(placement = 'header') {
   const { rates, rateError } = state.data;
   const stale = !rates || Date.now() - Date.parse(rates.updatedAt ?? rates.date) > 48 * 3600000;
-  return `<div class="rate-status ${stale || rateError ? 'outdated' : ''}"><span class="status-dot"></span><span>${!rates ? 'Курсы пока не загружены' : `Курсы на ${dateLabel(rates.date)}`}</span></div>`;
+  return `<details class="rate-details ${placement}"><summary class="rate-status ${stale || rateError ? 'outdated' : ''}"><span class="status-dot"></span><span>${!rates ? 'Нет курсов' : `Курсы на ${dateLabel(rates.date)}`}</span>${icon('chevron')}</summary><div class="rate-source"><p>${rates ? `Дата курса: ${dateLabel(rates.date, true)}` : 'Курсы ещё не загружены.'}</p>${rates && (stale || rateError) ? '<p>Используем последние доступные данные.</p>' : ''}<a href="https://www.exchangerate-api.com" target="_blank" rel="noreferrer">Rates By Exchange Rate API</a></div></details>`;
 }
 
 function shell(content) {
-  return `<aside class="sidebar"><a href="#overview" class="brand" aria-label="Свод — обзор"><img src="/icon.svg" alt="" width="33" height="33">свод<span class="brand-dot">/</span></a><div class="workspace-label">Личные финансы</div><nav aria-label="Основная навигация">${navItems.map(([id, label]) => `<a href="#${id}" class="nav-item ${state.page === id ? 'active' : ''}" aria-label="${label}" ${state.page === id ? 'aria-current="page"' : ''}>${icon(id)}<span>${label}</span></a>`).join('')}</nav><div class="sidebar-bottom"><div class="private-note">${icon('lock')}Личное пространство</div><button class="nav-item" data-action="logout" aria-label="Выйти">${icon('logout')}<span>Выйти</span></button><span class="version">Свод / 1.0</span></div></aside><div class="app-main"><header class="topbar"><span class="breadcrumb">Моё пространство <span>/</span> <strong>${navItems.find(([id]) => id === state.page)?.[1] ?? 'Обзор'}</strong></span><div class="topbar-actions">${rateStatus()}<button class="icon-button" data-action="privacy" aria-label="${state.hidden ? 'Показать' : 'Скрыть'} суммы" aria-pressed="${state.hidden}" title="${state.hidden ? 'Показать' : 'Скрыть'} суммы">${icon('eye')}</button><span class="avatar" title="Личное пространство">Я</span></div></header><main id="main-content" class="content">${content}<footer class="page-footer"><span>Свод · Всё складывается</span><a href="https://www.exchangerate-api.com" target="_blank" rel="noreferrer">Rates By Exchange Rate API ${icon('arrow')}</a></footer></main></div>`;
+  return `<aside class="sidebar">
+    <a href="#overview" class="brand" aria-label="Свод — обзор"><img src="/icon.svg" alt="" width="33" height="33">свод</a>
+    <nav aria-label="Основная навигация">${navItems.map(([id, label]) => `<a href="#${id}" class="nav-item ${state.page === id ? 'active' : ''}" aria-label="${label}" ${state.page === id ? 'aria-current="page"' : ''}>${icon(id)}<span>${label}</span></a>`).join('')}</nav>
+    <div class="sidebar-bottom"><button class="nav-item" data-action="logout" aria-label="Выйти">${icon('logout')}<span>Выйти</span></button></div>
+  </aside><div class="app-main">
+    <header class="topbar"><div class="topbar-actions">${rateStatus()}<button class="icon-button" data-action="privacy" aria-label="${state.hidden ? 'Показать' : 'Скрыть'} суммы" aria-pressed="${state.hidden}" title="${state.hidden ? 'Показать' : 'Скрыть'} суммы">${icon(state.hidden ? 'eyeOff' : 'eye')}</button></div></header>
+    <main id="main-content" class="content">${content}</main>
+  </div>`;
 }
 
-function heading(title, subtitle, action = true) {
-  return `<div class="page-heading"><div><h1>${title}</h1><p>${subtitle}</p></div>${action ? `<button class="button primary" data-action="add" aria-label="Добавить счёт">${icon('plus')}Добавить счёт</button>` : ''}</div>`;
+function heading(title, subtitle = '', action = true) {
+  return `<div class="page-heading"><div><h1>${title}</h1>${subtitle ? `<p>${subtitle}</p>` : ''}</div>${action ? `<button class="button primary" data-action="add" aria-label="Добавить счёт">${icon('plus')}Добавить счёт</button>` : ''}</div>`;
 }
 
 function warning() {
@@ -125,7 +131,7 @@ function warning() {
 function capitalSummary() {
   const data = state.data;
   const start = data.history[0]?.date;
-  return `<section class="capital-summary" aria-label="Общий капитал"><div class="total-block"><div class="total-label">Общий капитал <button class="currency-switch" data-action="base" title="Сменить основную валюту">${data.base}<span>⌄</span></button></div><div class="total-value">${money(data.total)}</div><div class="total-change ${data.change.total < 0 ? 'negative' : ''}">${data.change.total !== null ? `${icon(data.change.total < 0 ? 'analytics' : 'arrow')}<strong>${signed(data.change.total)}</strong><span>${start ? `с ${dateLabel(start)}` : 'за время наблюдений'}</span>` : '<span>История появится по мере наблюдений</span>'}</div></div><div class="summary-facts"><div><span>На счетах</span><strong>${data.accounts.length}<small>${plural(data.accounts.length, ['счёт', 'счёта', 'счетов'])}</small></strong></div><div><span>Валютах</span><strong>${data.currencies.length}<small>${data.currencies.map(row => row.currency).join(' / ') || 'пока нет'}</small></strong></div></div></section>`;
+  return `<section class="capital-summary" aria-label="Общий капитал"><div class="total-block"><div class="total-label">Общий капитал <button class="currency-switch" data-action="base" title="Сменить основную валюту">${data.base}${icon('chevron')}</button></div><div class="total-value">${money(data.total)}</div><div class="total-change ${data.change.total < 0 ? 'negative' : ''}">${data.change.total !== null ? `${icon(data.change.total < 0 ? 'arrowDown' : 'arrow')}<strong>${signed(data.change.total)}</strong><span>${start ? `с ${dateLabel(start)}` : 'за время наблюдений'}</span>` : '<span>История появится по мере наблюдений</span>'}</div></div><div class="summary-facts"><div><span>Счета</span><strong>${data.accounts.length}</strong></div><div><span>Валюты</span><strong>${data.currencies.length}<small>${data.currencies.map(row => row.currency).join(' / ') || 'пока нет'}</small></strong></div></div></section>`;
 }
 
 function chart() {
@@ -133,7 +139,7 @@ function chart() {
   const cutoff = new Date(); cutoff.setUTCDate(cutoff.getUTCDate() - state.period);
   const history = data.history.filter(point => point.date >= cutoff.toISOString().slice(0, 10));
   const valid = history.filter(point => point.total !== null);
-  const toolbar = `<div class="section-heading"><div><h2>Динамика капитала</h2><span class="subtle">Остатки и курсы на каждую дату</span></div><div class="segmented" aria-label="Период графика">${[[30, '1М'], [90, '3М'], [180, '6М'], [365, '1Г']].map(([period, label]) => `<button data-action="period" data-period="${period}" aria-pressed="${state.period === period}" class="${state.period === period ? 'selected' : ''}">${label}</button>`).join('')}</div></div>`;
+  const toolbar = `<div class="section-heading"><div><h2>Динамика капитала</h2></div><div class="segmented" aria-label="Период графика">${[[30, '1М'], [90, '3М'], [180, '6М'], [365, '1Г']].map(([period, label]) => `<button data-action="period" data-period="${period}" aria-pressed="${state.period === period}" class="${state.period === period ? 'selected' : ''}">${label}</button>`).join('')}</div></div>`;
   if (state.hidden) return `<section class="chart-section">${toolbar}<div class="chart-empty">${icon('eye')}Суммы скрыты</div></section>`;
   if (valid.length < 2) return `<section class="chart-section">${toolbar}<div class="chart-empty">${icon('analytics')}<strong>${valid.length ? 'Первая точка уже есть' : 'Здесь будет ваша история'}</strong><p>${valid.length ? 'Завтра появится следующая: курсы обновляются автоматически.' : 'Добавьте счёт. График начнётся с первого доступного остатка и курса.'}</p>${valid.length ? `<span class="first-point">${money(valid[0].total)} · ${dateLabel(valid[0].date)}</span>` : ''}</div></section>`;
   const width = window.innerWidth <= 580 ? 400 : 720, height = 230, left = 0, right = width - 100, top = 25, bottom = 195;
@@ -161,7 +167,7 @@ function chart() {
   }).join('');
   const lastIndex = history.findLastIndex(point => point.total !== null);
   const [endX, endY] = position(history[lastIndex], lastIndex);
-  return `<section class="chart-section">${toolbar}<div class="chart-wrap"><svg class="capital-chart" viewBox="0 0 ${width} ${height}" role="img" aria-label="Капитал с ${dateLabel(history[0].date)} по ${dateLabel(history.at(-1).date)}: от ${money(valid[0].total)} до ${money(valid.at(-1).total)}">${grids}<path class="chart-line" d="${line}"/><circle class="chart-end" cx="${endX}" cy="${endY}" r="4.5"/>${points}${labels}</svg></div><div class="chart-caption"><span class="legend-dot color-0"></span>Капитал в ${data.base}<span class="chart-caption-end">Ежедневная оценка</span></div></section>`;
+  return `<section class="chart-section">${toolbar}<div class="chart-wrap"><svg class="capital-chart" viewBox="0 0 ${width} ${height}" role="img" aria-label="Капитал с ${dateLabel(history[0].date)} по ${dateLabel(history.at(-1).date)}: от ${money(valid[0].total)} до ${money(valid.at(-1).total)}">${grids}<path class="chart-line" d="${line}"/><circle class="chart-end" cx="${endX}" cy="${endY}" r="4.5"/>${points}${labels}</svg></div><div class="chart-caption"><span class="legend-dot color-0"></span>Капитал в ${data.base}</div></section>`;
 }
 
 function allocation() {
@@ -172,13 +178,13 @@ function allocation() {
     const segment = `<circle class="donut-segment color-stroke-${index % 6}" cx="90" cy="90" r="66" pathLength="100" stroke-dasharray="${share} ${100 - share}" stroke-dashoffset="${-offset}"/>`;
     offset += share; return segment;
   }).join('');
-  return `<section class="allocation-section"><div class="section-heading"><h2>Валюты капитала</h2>${icon('globe')}</div><div class="donut-wrap"><svg viewBox="0 0 180 180" class="donut" role="img" aria-label="Распределение капитала по валютам"><circle class="donut-track" cx="90" cy="90" r="66"/>${state.hidden ? '' : segments}</svg><div class="donut-center"><strong>${data.currencies.length}</strong><span>${plural(data.currencies.length, ['валюта', 'валюты', 'валют'])}</span></div></div><div class="allocation-legend">${data.currencies.map((row, index) => `<div><span class="legend-dot color-${index % 6}"></span><strong>${row.currency}</strong><span>${state.hidden ? '•••' : data.total > 0 && row.value !== null ? `${Math.round(row.value / data.total * 100)}%` : '—'}</span><b>${money(row.value, data.base, true)}</b></div>`).join('') || '<p class="subtle">Здесь появится доля каждой валюты.</p>'}</div></section>`;
+  return `<section class="allocation-section"><div class="section-heading"><h2>Валюты капитала</h2></div><div class="donut-wrap"><svg viewBox="0 0 180 180" class="donut" role="img" aria-label="Распределение капитала по валютам"><circle class="donut-track" cx="90" cy="90" r="66"/>${state.hidden ? '' : segments}</svg><div class="donut-center"><strong>${data.currencies.length}</strong><span>${plural(data.currencies.length, ['валюта', 'валюты', 'валют'])}</span></div></div><div class="allocation-legend">${data.currencies.map((row, index) => `<div><span class="legend-dot color-${index % 6}"></span><strong>${row.currency}</strong><span>${state.hidden ? '•••' : data.total > 0 && row.value !== null ? `${Math.round(row.value / data.total * 100)}%` : '—'}</span><b>${money(row.value, data.base, true)}</b></div>`).join('') || '<p class="subtle">Здесь появится доля каждой валюты.</p>'}</div></section>`;
 }
 
 function accountRows(accounts) {
   return accounts.map((account, index) => {
     const age = Math.floor((Date.now() - Date.parse(account.date)) / 86400000);
-    return `<div class="account-row"><div class="account-identity"><span class="account-symbol currency-${['RUB', 'USD', 'KZT', 'EUR'].includes(account.currency) ? account.currency : 'other'}">${escape(symbols[account.currency] ?? account.currency.slice(0, 1))}</span><div><strong>${escape(account.name)}</strong><span>${escape(account.institution || typeNames[account.type])}</span></div></div><span class="account-currency">${account.currency}</span><div class="account-amount"><strong>${money(account.amount, account.currency)}</strong><span>${account.currency !== state.data.base ? `≈ ${money(account.value)}` : 'Основная валюта'}</span></div><div class="account-updated ${age > 30 ? 'old' : ''}"><span>${dateLabel(account.date)}</span><small>${age === 0 ? 'сегодня' : age > 30 ? 'пора проверить' : `${age} дн. назад`}</small></div><div class="row-actions"><button class="button small secondary" data-action="balance" data-id="${account.id}" aria-label="Обновить остаток счёта ${escape(account.name)}">${icon('refresh')}<span>Обновить</span></button><button class="icon-button edit-account" data-action="edit" data-id="${account.id}" aria-label="Настроить счёт ${escape(account.name)}">${icon('settings')}</button></div></div>`;
+    return `<div class="account-row"><div class="account-identity"><span class="account-symbol currency-${['RUB', 'USD', 'KZT', 'EUR'].includes(account.currency) ? account.currency : 'other'}">${escape(symbols[account.currency] ?? account.currency.slice(0, 1))}</span><div><strong>${escape(account.name)}</strong><span>${escape(account.institution || typeNames[account.type])}</span></div></div><span class="account-currency">${account.currency}</span><div class="account-amount"><strong>${money(account.amount, account.currency)}</strong>${account.currency !== state.data.base ? `<span>≈ ${money(account.value)}</span>` : ''}</div><div class="account-updated ${age > 30 ? 'old' : ''}"><span>${dateLabel(account.date)}</span><small>${age === 0 ? 'сегодня' : age > 30 ? 'пора проверить' : `${age} дн. назад`}</small></div><div class="row-actions"><button class="button small secondary" data-action="balance" data-id="${account.id}" aria-label="Обновить остаток счёта ${escape(account.name)}">${icon('refresh')}<span>Обновить</span></button><button class="icon-button edit-account" data-action="edit" data-id="${account.id}" aria-label="Настроить счёт ${escape(account.name)}">${icon('edit')}</button></div></div>`;
   }).join('');
 }
 
@@ -189,7 +195,7 @@ function accountsSection(preview = false) {
     accounts = accounts.filter(account => `${account.name} ${account.institution} ${account.currency}`.toLowerCase().includes(state.search.toLowerCase()));
     accounts.sort(state.sort === 'name' ? (left, right) => left.name.localeCompare(right.name) : state.sort === 'date' ? (left, right) => left.date.localeCompare(right.date) : (left, right) => (right.value ?? 0) - (left.value ?? 0));
   }
-  return `<section class="accounts-section"><div class="section-heading"><h2>${preview ? 'Мои счета' : 'Все счета'} <span class="count-badge">${data.accounts.length}</span></h2>${preview ? '<a class="text-link" href="#accounts">Все счета →</a>' : `<div class="account-tools"><label class="search-field">${icon('search')}<input type="search" id="account-search" placeholder="Найти счёт" aria-label="Поиск счетов" value="${escape(state.search)}"></label><select id="account-sort" aria-label="Сортировка счетов"><option value="value" ${state.sort === 'value' ? 'selected' : ''}>По сумме</option><option value="name" ${state.sort === 'name' ? 'selected' : ''}>По названию</option><option value="date" ${state.sort === 'date' ? 'selected' : ''}>Сначала старые</option></select></div>`}</div>${!data.accounts.length ? empty('Начнём с первого счёта', 'Добавьте карту, вклад или наличные. Остатки в разных валютах сложатся в общий капитал.') : `<div class="account-table"><div class="account-table-header"><span>Счёт / банк</span><span>Валюта</span><span>Остаток</span><span>Обновлён</span><span></span></div>${accounts.length ? accountRows(preview ? accounts.slice(0, 5) : accounts) : '<p class="no-results">Счетов по этому запросу нет.</p>'}</div>`}</section>`;
+  return `<section class="accounts-section"><div class="section-heading"><h2>${preview ? `Счета <span class="count-badge">${data.accounts.length}</span>` : `${data.accounts.length} ${plural(data.accounts.length, ['счёт', 'счёта', 'счетов'])}`}</h2>${preview ? `<a class="text-link" href="#accounts">Все счета${icon('chevronRight')}</a>` : `<div class="account-tools"><label class="search-field">${icon('search')}<input type="search" id="account-search" placeholder="Найти счёт" aria-label="Поиск счетов" value="${escape(state.search)}"></label><select id="account-sort" aria-label="Сортировка счетов"><option value="value" ${state.sort === 'value' ? 'selected' : ''}>По сумме</option><option value="name" ${state.sort === 'name' ? 'selected' : ''}>По названию</option><option value="date" ${state.sort === 'date' ? 'selected' : ''}>Сначала старые</option></select></div>`}</div>${!data.accounts.length ? empty('Нет счетов', 'Добавьте счёт с текущим остатком.') : `<div class="account-table"><div class="account-table-header"><span>Счёт / банк</span><span>Валюта</span><span>Остаток</span><span>Обновлён</span><span></span></div>${accounts.length ? accountRows(preview ? accounts.slice(0, 5) : accounts) : '<p class="no-results">Счетов по этому запросу нет.</p>'}</div>`}</section>`;
 }
 
 function changeDetails() {
@@ -199,15 +205,15 @@ function changeDetails() {
 
 function journal() {
   const rows = state.data.journal;
-  return `${heading('История остатков', 'Каждое обновление сохранено. Исправления не стирают прошлые записи.', false)}<div class="history-toolbar"><span class="subtle">${rows.length} записей · новые сверху</span><button class="button secondary" data-action="csv">${icon('download')}Скачать CSV</button></div>${rows.length ? `<div class="journal-list">${rows.map(row => {
+  return `${heading('История остатков', 'Исправления сохраняются отдельными записями.', false)}<div class="history-toolbar"><span class="subtle">${rows.length} ${plural(rows.length, ['запись', 'записи', 'записей'])} · новые сверху</span><button class="button secondary" data-action="csv">${icon('download')}Скачать CSV</button></div>${rows.length ? `<div class="journal-list">${rows.map(row => {
     const corrected = rows.some(other => other.account_id === row.account_id && other.date === row.date && other.id > row.id);
-    return `<article class="journal-row ${corrected ? 'superseded' : ''}"><span class="journal-icon">${icon(corrected ? 'edit' : 'refresh')}</span><div><strong>${escape(row.name)}${row.archived ? '<span class="tag">Архив</span>' : ''}</strong><p>${escape(row.note || (corrected ? 'Заменено более поздним обновлением за эту дату' : 'Остаток обновлён'))}</p><small>Записано ${dateLabel(row.created_at, true)}</small></div><div class="journal-amount"><strong>${money(row.amount, row.currency)}</strong><span>на ${dateLabel(row.date, true)}</span></div></article>`;
-  }).join('')}</div>` : empty('История начинается с вас', 'Добавьте первый счёт, затем обновляйте остатки — здесь появятся все записи.')}`;
+    return `<article class="journal-row ${corrected ? 'superseded' : ''}"><span class="journal-icon">${icon(corrected ? 'edit' : 'refresh')}</span><div><strong>${escape(row.name)}${row.archived ? '<span class="tag">Архив</span>' : ''}</strong>${row.note || corrected ? `<p>${escape(row.note || 'Заменено более поздним обновлением за эту дату')}</p>` : ''}<small>Записано ${dateLabel(row.created_at, true)}</small></div><div class="journal-amount"><strong>${money(row.amount, row.currency)}</strong><span>на ${dateLabel(row.date, true)}</span></div></article>`;
+  }).join('')}</div>` : empty('Нет записей', 'Добавьте счёт или обновите остаток.')}`;
 }
 
 function settings() {
   const data = state.data;
-  return `${heading('Настройки', 'Ваши валюты, доступ и сохранность данных.', false)}
+  return `${heading('Настройки', '', false)}
     <div class="settings-list">
       <section class="settings-section">
         <div><h2>Основная валюта</h2><p>В ней показываем общий капитал и аналитику. Остатки счетов хранятся в исходных валютах.</p></div>
@@ -215,21 +221,18 @@ function settings() {
       </section>
       <section class="settings-section">
         <div><h2>Курсы валют</h2><p>Обновляются раз в сутки. Если интернет недоступен, используем сохранённый курс с указанием даты.</p></div>
-        <div>${rateStatus()}<p class="subtle">${data.rates ? `Следующая публикация провайдера: ${escape(data.rates.nextUpdate ? fullDate(data.rates.nextUpdate) : 'в течение суток')}` : 'Курсы ещё не загружены.'}</p><button class="button secondary" data-action="refresh">${icon('refresh')}Проверить курсы</button></div>
+        <div>${rateStatus('settings')}<p class="subtle">${data.rates ? `Следующая публикация провайдера: ${escape(data.rates.nextUpdate ? fullDate(data.rates.nextUpdate) : 'в течение суток')}` : 'Курсы ещё не загружены.'}</p><button class="button secondary" data-action="refresh">${icon('refresh')}Проверить курсы</button></div>
       </section>
       <section class="settings-section">
         <div><h2>Пароль</h2><p>После смены пароля все сессии завершатся. Потребуется войти заново.</p></div>
         <form id="password-form"><label>Текущий пароль<input name="current" type="password" autocomplete="current-password" required></label><label>Новый пароль<input name="password" type="password" minlength="12" maxlength="256" autocomplete="new-password" required placeholder="Не меньше 12 символов"></label><label>Повторите новый пароль<input name="confirm" type="password" minlength="12" maxlength="256" autocomplete="new-password" required></label><p class="form-error" role="alert"></p><button class="button secondary">Изменить пароль</button></form>
       </section>
       <section class="settings-section">
-        <div><h2>Ваши данные</h2><p>JSON содержит счета, историю остатков и курсы. Полную резервную копию базы можно создать командой из README.</p></div>
-        <div class="export-buttons"><button class="button secondary" data-action="export">${icon('download')}Экспорт JSON</button><button class="button secondary" data-action="csv">${icon('download')}История в CSV</button><small>Экспорты содержат финансовые данные без пароля.</small></div>
+        <div><h2>Ваши данные</h2><p>Скачайте счета и историю в JSON или CSV.</p></div>
+        <div class="export-buttons"><button class="button secondary" data-action="export">${icon('download')}Экспорт JSON</button><button class="button secondary" data-action="csv">${icon('download')}История в CSV</button><small>Файлы экспорта не защищены паролем.</small></div>
       </section>
       ${data.archived.length ? `<section class="settings-section"><div><h2>Архив счетов</h2><p>Архивные счета исключены из текущего капитала, но остались в истории и экспорте.</p></div><div class="archived-list">${data.archived.map(account => `<div><strong>${escape(account.name)}</strong><span>${account.currency} · ${dateLabel(account.archived_at, true)}</span></div>`).join('')}</div></section>` : ''}
-      <section class="settings-section">
-        <div><h2>Текущая сессия</h2><p>Завершите вход на этом устройстве. Счета и история сохранятся.</p></div>
-        <div><button class="button secondary" data-action="logout">${icon('logout')}Выйти из Свода</button></div>
-      </section>
+      <div class="settings-logout"><button class="button secondary" data-action="logout">${icon('logout')}Выйти</button></div>
     </div>`;
 }
 
@@ -245,8 +248,8 @@ function render() {
   document.title = `${navItems.find(([id]) => id === state.page)[1]} · Свод`;
   let content = '';
   if (state.page === 'overview') content = `${heading('Обзор капитала', fullDate(new Date().toISOString()))}${warning()}${capitalSummary()}<div class="overview-grid">${chart()}${allocation()}</div>${accountsSection(true)}`;
-  if (state.page === 'accounts') content = `${heading('Мои счета', 'Каждый счёт — часть общей картины.')}${warning()}${accountsSection()}`;
-  if (state.page === 'analytics') content = `${heading('Аналитика', 'Как меняется капитал и в каких валютах он хранится.', false)}${warning()}${capitalSummary()}<div class="overview-grid">${chart()}${allocation()}</div>${changeDetails()}<div class="currency-detail-list">${data.currencies.map((row, index) => `<div><span class="currency-code">${row.currency}</span><span>${escape(currencyNames.of(row.currency))}</span><strong>${money(row.amount, row.currency)}</strong><span>≈ ${money(row.value)}</span></div>`).join('')}</div>`;
+  if (state.page === 'accounts') content = `${heading('Счета')}${warning()}${accountsSection()}`;
+  if (state.page === 'analytics') content = `${heading('Аналитика', '', false)}${warning()}${capitalSummary()}<div class="overview-grid">${chart()}${allocation()}</div>${changeDetails()}<div class="currency-detail-list">${data.currencies.map((row, index) => `<div><span class="currency-code">${row.currency}</span><span>${escape(currencyNames.of(row.currency))}</span><strong>${money(row.amount, row.currency)}</strong><span>≈ ${money(row.value)}</span></div>`).join('')}</div>`;
   if (state.page === 'history') content = journal();
   if (state.page === 'settings') content = settings();
   root.innerHTML = shell(content);
@@ -273,13 +276,13 @@ function amountFields(account) {
 }
 
 function addDialog() {
-  showDialog('Новый счёт', `<p class="dialog-intro">Добавьте место, где хранятся ваши деньги.</p><form id="account-form"><label>Название счёта<input name="name" required maxlength="80" placeholder="Например, накопления" autofocus></label><label>Банк или организация <span class="optional">необязательно</span><input name="institution" maxlength="80" placeholder="Название банка"></label><div class="form-columns"><label>Валюта<select name="currency">${currencyOptions(state.data.base)}</select></label><label>Тип счёта<select name="type">${Object.entries(typeNames).map(([value, label]) => `<option value="${value}">${label}</option>`).join('')}</select></label></div>${amountFields()}<small class="field-help">Можно выбрать любую валюту из списка. Если курса нет, предупредим, что итог неполный.</small><p class="form-error" role="alert"></p><div class="dialog-footer"><button type="button" class="button secondary" data-action="close">Отмена</button><button class="button primary">Добавить счёт</button></div></form>`);
+  showDialog('Новый счёт', `<form id="account-form"><label>Название счёта<input name="name" required maxlength="80" placeholder="Например, накопления" autofocus></label><label>Банк или организация <span class="optional">необязательно</span><input name="institution" maxlength="80" placeholder="Название банка"></label><div class="form-columns"><label>Валюта<select name="currency">${currencyOptions(state.data.base)}</select></label><label>Тип счёта<select name="type">${Object.entries(typeNames).map(([value, label]) => `<option value="${value}">${label}</option>`).join('')}</select></label></div>${amountFields()}<p class="form-error" role="alert"></p><div class="dialog-footer"><button type="button" class="button secondary" data-action="close">Отмена</button><button class="button primary">Добавить счёт</button></div></form>`);
 }
 
 function balanceDialog(id) {
   const account = state.data.accounts.find(row => row.id === id);
   if (!account) return;
-  showDialog('Обновить остаток', `<p class="dialog-intro">${escape(account.name)} · ${account.currency}</p><form id="balance-form" data-id="${id}">${amountFields(account)}<p class="field-help">Вводите весь остаток, не разницу. Предыдущая запись сохранится в истории.</p><p class="form-error" role="alert"></p><div class="dialog-footer"><button type="button" class="button secondary" data-action="close">Отмена</button><button class="button primary">Сохранить остаток</button></div></form>`);
+  showDialog('Обновить остаток', `<p class="dialog-intro">${escape(account.name)} · ${account.currency}</p><form id="balance-form" data-id="${id}">${amountFields(account)}<p class="field-help">Введите полный остаток, не разницу.</p><p class="form-error" role="alert"></p><div class="dialog-footer"><button type="button" class="button secondary" data-action="close">Отмена</button><button class="button primary">Сохранить остаток</button></div></form>`);
   const input = dialog.querySelector('[name="amount"]'); input.focus(); input.select();
 }
 
@@ -295,6 +298,9 @@ function download(data, filename, type) {
 }
 
 document.addEventListener('click', async event => {
+  document.querySelectorAll('.rate-details[open]').forEach(details => {
+    if (!details.contains(event.target)) details.open = false;
+  });
   const button = event.target.closest('[data-action]');
   if (!button) return;
   const action = button.dataset.action;
@@ -352,6 +358,14 @@ document.addEventListener('submit', async event => {
   finally { submit.disabled = false; submit.innerHTML = submitLabel; submit.removeAttribute('aria-busy'); form.removeAttribute('aria-busy'); }
 });
 
+document.addEventListener('keydown', event => {
+  if (event.key !== 'Escape' || dialog.open) return;
+  const details = [...document.querySelectorAll('.rate-details[open]')];
+  const focused = details.find(element => element.contains(document.activeElement));
+  details.forEach(element => { element.open = false; });
+  focused?.querySelector('summary').focus();
+});
+
 document.addEventListener('input', event => {
   if (event.target.id !== 'account-search') return;
   const position = event.target.selectionStart;
@@ -380,7 +394,7 @@ async function boot() {
     const session = await api('/session');
     if (session.authenticated) await load(); else renderAuth(session.initialized);
   } catch (error) {
-    root.innerHTML = `<main class="connection-error"><span class="brand-mark">с</span><h1>Не удалось открыть Свод</h1><p>${escape(error.message)}</p><a href="/" class="button primary">Попробовать снова</a></main>`;
+    root.innerHTML = `<main class="connection-error"><img src="/icon.svg" alt="" width="45" height="45"><h1>Не удалось открыть Свод</h1><p>${escape(error.message)}</p><a href="/" class="button primary">Попробовать снова</a></main>`;
   }
 }
 void boot();

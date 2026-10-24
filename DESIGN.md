@@ -20,6 +20,8 @@ System sans, tabular numerals, fixed rem scale. Headers 28px, primary total 44px
 
 Compact left sidebar, broad content canvas, clear account rows, capital chart and currency breakdown. Dividers separate data rather than nested cards. Radii 8–14px. Native dialogs for focused balance entry and account creation. Fixed bottom navigation on small screens.
 
+No breadcrumb for a flat five-section navigation, promotional footer, version badge, or owner avatar. The top bar contains rate freshness and the privacy toggle. Provider attribution is available by expanding the rate status.
+
 Authentication is a single centered 360px column on white: small brand, task heading, necessary fields, one action. First run says «Настройка доступа» / «Сохранить пароль»; later visits say «Вход» / «Войти». No marketing panel, currency decorations, signup language, or account selection.
 
 ## States
@@ -29,6 +31,8 @@ Explicit empty, loading, stale rate, missing conversion, validation, saving and 
 ## Controls and responsive details
 
 Shared inputs and selects are 44px high with 8px corners. Native selects reserve 40px at the trailing edge for a consistent chevron; mobile control text is 16px. Toolbar controls have no top margin, and search icons align to the input's center. Compact desktop row actions are 36px; mobile targets are at least 44px.
+
+Icons use pinned Lucide paths, a 24px viewBox, round caps and joins, and a consistent 2px stroke. Inputs and selects focus with a single 2px frame inside their bounds, never an external second outline. Keyboard focus remains visible on links and buttons; forced-colors mode uses an inset system outline.
 
 Dialogs keep their heading and action footer visible while the body scrolls. Footer submit buttons stay associated with their form. Busy labels preserve button dimensions; validation messages scroll into view with 16px clearance. On phones, currency and account type occupy separate full-width rows.
 

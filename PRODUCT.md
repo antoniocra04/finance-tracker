@@ -32,6 +32,7 @@ Light, precise, modern. Russian interface. Working name chosen by implementer: Ð
 - Distinguish balance changes from exchange-rate effects.
 - Preserve history and original currency amounts.
 - Always disclose missing or outdated rates.
+- No slogans, version badges, personal-space labels, decorative avatars, or redundant explanatory copy. Keep dates, actionable labels, and operational warnings.
 
 ## Accessibility & Inclusion
 
