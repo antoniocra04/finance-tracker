@@ -9,7 +9,7 @@ import { currencyCodes } from './money.mjs';
 const scrypt = promisify(scryptCallback);
 const hashToken = token => createHash('sha256').update(token).digest('hex');
 const fail = (status, message) => Object.assign(new Error(message), { status });
-const assets = new Map([['/', ['index.html', 'text/html']], ['/app.js', ['app.js', 'text/javascript']], ['/styles.css', ['styles.css', 'text/css']], ['/icon.svg', ['icon.svg', 'image/svg+xml']]]);
+const assets = new Map([['/', ['index.html', 'text/html']], ['/app.js', ['app.js', 'text/javascript']], ['/fx.mjs', ['fx.mjs', 'text/javascript']], ['/styles.css', ['styles.css', 'text/css']], ['/icon.svg', ['icon.svg', 'image/svg+xml']]]);
 
 async function passwordHash(password) {
   if (typeof password !== 'string' || password.length < 12 || password.length > 256) throw fail(400, 'Пароль: от 12 до 256 символов');
@@ -155,6 +155,15 @@ export function createApp({ dbPath, bootstrapToken, fetchRates = fetchLiveRates,
         send(200, [...currencyCodes].sort().map(code => ({ code, supported: code === 'USD' || Boolean(latest?.rates[code]) }))); return;
       }
       if (path === '/api/accounts' && method === 'POST') { send(201, store.createAccount(await jsonBody(request))); return; }
+      const balanceRoute = path.match(/^\/api\/balances\/([1-9]\d*)$/);
+      if (balanceRoute) {
+        const id = Number(balanceRoute[1]);
+        if (!Number.isSafeInteger(id)) throw fail(400, 'Некорректный номер записи');
+        if (method === 'PATCH') store.updateBalance(id, await jsonBody(request));
+        else if (method === 'DELETE') { await jsonBody(request); store.deleteBalance(id); }
+        else throw fail(405, 'Метод не поддерживается');
+        send(200, { ok: true }); return;
+      }
       const accountRoute = path.match(/^\/api\/accounts\/([a-f0-9-]{36})(?:\/(balances|archive))?$/);
       if (accountRoute) {
         const [, id, action] = accountRoute;

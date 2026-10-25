@@ -51,6 +51,26 @@ export class Store {
     this.db.prepare('INSERT INTO balances(account_id,date,amount,note,created_at) VALUES (?,?,?,?,?)').run(id, date, amount, note, new Date().toISOString());
   }
 
+  updateBalance(id, input) {
+    const row = this.db.prepare('SELECT balances.*, accounts.currency, accounts.archived_at FROM balances JOIN accounts ON accounts.id=balances.account_id WHERE balances.id=?').get(id);
+    if (!row) throw new Error('Запись не найдена');
+    const date = validDate(input.date);
+    const amount = toMinor(input.amount, row.currency);
+    const note = textField(input.note, 'Заметка', 500);
+    if (row.archived_at && date > row.archived_at) throw new Error('Дата записи не может быть позже даты архивации счёта');
+    this.db.prepare('UPDATE balances SET amount=?, date=?, note=? WHERE id=?').run(amount, date, note, id);
+  }
+
+  deleteBalance(id) {
+    return this.transaction(() => {
+      const row = this.db.prepare('SELECT account_id FROM balances WHERE id=?').get(id);
+      if (!row) throw new Error('Запись не найдена');
+      const count = this.db.prepare('SELECT COUNT(*) AS count FROM balances WHERE account_id=?').get(row.account_id).count;
+      if (count === 1) throw new Error('Единственную запись счёта нельзя удалить. Её можно отредактировать.');
+      this.db.prepare('DELETE FROM balances WHERE id=?').run(id);
+    });
+  }
+
   updateAccount(id, input) {
     const name = textField(input.name, 'Название', 80, true);
     const institution = textField(input.institution, 'Банк', 80);
@@ -119,10 +139,20 @@ export class Store {
     const change = complete ? { total: current.total - initial.total, balance: constant - initial.total, fx: current.total - constant } : { total: null, balance: null, fx: null };
     const currencies = [...new Set(current.accounts.map(account => account.currency))].map(currency => {
       const accounts = current.accounts.filter(account => account.currency === currency);
-      return { currency, amount: accounts.reduce((sum, account) => sum + account.amount, 0), value: accounts.some(account => account.value === null) ? null : accounts.reduce((sum, account) => sum + account.value, 0) };
+      const amount = accounts.reduce((sum, account) => sum + account.amount, 0);
+      const value = accounts.some(account => account.value === null) ? null : accounts.reduce((sum, account) => sum + account.value, 0);
+      const initialValue = convert(amount, currency, base, initial.fx);
+      return { currency, amount, value, rate: convert(1, currency, base, current.fx), initialRate: convert(1, currency, base, initial.fx), fx: value !== null && initialValue !== null ? value - initialValue : null };
     }).sort((left, right) => (right.value ?? 0) - (left.value ?? 0));
+    const quoteDates = history.length ? [start, ...all.rates.filter(row => row.date > start && row.date <= today).map(row => row.date)] : [];
+    const fxHistory = currencies.filter(row => row.currency !== base).map(({ currency }) => ({
+      currency, points: quoteDates.map(date => {
+        const snapshot = all.rates.findLast(row => row.date <= date);
+        return { date, rate: convert(1, currency, base, snapshot?.rates ?? {}), rateDate: snapshot?.date ?? null };
+      })
+    }));
     return {
-      base, total: current.total, missing: current.missing, accounts: current.accounts, currencies, history, change,
+      base, total: current.total, missing: current.missing, accounts: current.accounts, currencies, history, change, fxHistory,
       rates: this.latestRates(), rateError: this.getSetting('rateError') ?? null,
       journal: [...all.balances].reverse().map(balance => {
         const account = all.accounts.find(row => row.id === balance.account_id);

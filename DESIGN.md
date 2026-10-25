@@ -37,3 +37,11 @@ Icons use pinned Lucide paths, a 24px viewBox, round caps and joins, and a consi
 Dialogs keep their heading and action footer visible while the body scrolls. Footer submit buttons stay associated with their form. Busy labels preserve button dimensions; validation messages scroll into view with 16px clearance. On phones, currency and account type occupy separate full-width rows.
 
 Mobile account rows show the full name, then the balance and conversion underneath, with actions beside them. Search and sorting stack below 380px. The journal stacks amounts below the entry instead of squeezing three columns. Icon-only tablet navigation retains accessible names. Settings always provide logout, including when the sidebar footer is hidden.
+
+## Currency charts and history actions
+
+Analytics uses stacked, divider-separated foreign-currency charts, not a card grid. Each pair quotes one unit against the current reporting currency. A shared 30/90/180/365-day selector changes quote charts and percentages only; the separately dated contribution matches the aggregate FX observation period. Price lines remain neutral; positive/negative state color belongs to signed changes. Quote values remain visible under the privacy toggle because they are public; private currency contributions are masked.
+
+Sparse dates use calendar-spaced axes. Missing quotes break paths. Single-publication and missing-start states explain why no trend or percentage is available. Expandable tables provide exact observations without requiring hover or exposing account amounts.
+
+History actions use edit and trash Lucide icons with descriptive accessible names. On mobile, 44px actions stack beside the description and amount. The creation timestamp occupies its own line even without a note. Native edit dialogs prefill amount, date and note; deletion names the entry, explains recalculation and irreversibility, and initially focuses Cancel. The sole balance's delete action is disabled with an explanatory title, backed by a server-side guard.

@@ -1,3 +1,5 @@
+import { rateWindow, rateGeometry } from './fx.mjs';
+
 const root = document.querySelector('#app');
 const dialog = document.querySelector('#dialog');
 const paths = {
@@ -21,6 +23,7 @@ const paths = {
   search: '<path d="m21 21-4.34-4.34" /><circle cx="11" cy="11" r="8" />',
   archive: '<rect width="20" height="5" x="2" y="3" rx="1" /><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8" /><path d="M10 12h4" />',
   edit: '<path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.375 2.625a1 1 0 0 1 3 3l-9.013 9.014a2 2 0 0 1-.853.505l-2.873.84a.5.5 0 0 1-.62-.62l.84-2.873a2 2 0 0 1 .506-.852z" />',
+  trash: '<path d="M10 11v6" /><path d="M14 11v6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" /><path d="M3 6h18" /><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />',
   info: '<circle cx="12" cy="12" r="10" /><path d="M12 16v-4" /><path d="M12 8h.01" />'
 };
 const icon = (name, className = '') => `<svg class="icon ${className}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${paths[name] ?? paths.wallet}</svg>`;
@@ -32,7 +35,7 @@ const currencyNames = new Intl.DisplayNames('ru', { type: 'currency' });
 const typeNames = { checking: 'Текущий счёт', savings: 'Накопления', cash: 'Наличные', investment: 'Инвестиции', other: 'Другой счёт' };
 const symbols = { RUB: '₽', USD: '$', KZT: '₸', EUR: '€', GBP: '£', CNY: '¥', JPY: '¥' };
 const plural = (count, forms) => forms[count % 100 >= 11 && count % 100 <= 14 ? 2 : count % 10 === 1 ? 0 : count % 10 >= 2 && count % 10 <= 4 ? 1 : 2];
-const state = { data: null, currencies: [], page: location.hash.slice(1) || 'overview', hidden: sessionStorage.getItem('svod-hidden') === 'true', period: 90, search: '', sort: 'value' };
+const state = { data: null, currencies: [], page: location.hash.slice(1) || 'overview', hidden: sessionStorage.getItem('svod-hidden') === 'true', period: 90, fxPeriod: 90, search: '', sort: 'value' };
 const navItems = [['overview', 'Обзор'], ['accounts', 'Счета'], ['analytics', 'Аналитика'], ['history', 'История'], ['settings', 'Настройки']];
 
 async function api(path, { method = 'GET', body } = {}) {
@@ -53,6 +56,7 @@ function money(amount, currency = state.data?.base ?? 'RUB', compact = false) {
 }
 
 function signed(amount) {
+  if (state.hidden) return '••••••';
   return amount === null ? 'Недостаточно данных' : `${amount > 0 ? '+' : amount < 0 ? '−' : ''}${money(Math.abs(amount))}`;
 }
 
@@ -203,11 +207,36 @@ function changeDetails() {
   return `<section class="change-details"><div class="section-heading"><div><h2>Из чего сложилось изменение</h2><p class="subtle">${data.history.length ? `${dateLabel(data.history[0].date, true)} — ${dateLabel(today(), true)}` : 'За период наблюдений'}</p></div></div><div class="change-grid"><div><span>Изменение остатков</span><strong>${signed(data.change.balance)}</strong><p>Новые суммы на счетах, в курсах начала периода.</p></div><div><span>Влияние курсов</span><strong>${signed(data.change.fx)}</strong><p>Переоценка текущих остатков из-за изменения курсов.</p></div><div><span>Общее изменение</span><strong>${signed(data.change.total)}</strong><p>Изменение стоимости капитала, не инвестиционная доходность.</p></div></div></section>`;
 }
 
+const rateNumber = (value, digits = 7) => value === null ? 'Нет курса' : new Intl.NumberFormat('ru', { maximumSignificantDigits: digits }).format(value);
+const ratePercent = value => value === null ? 'Нет данных для сравнения' : `${value > 0 ? '+' : value < 0 ? '−' : ''}${Math.abs(value) > 0 && Math.abs(value) < 0.01 ? '<0,01' : new Intl.NumberFormat('ru', { maximumFractionDigits: 2 }).format(Math.abs(value))}%`;
+
+function currencyChart(series) {
+  const row = state.data.currencies.find(item => item.currency === series.currency);
+  const window = rateWindow(series.points, state.fxPeriod, today());
+  const width = innerWidth <= 580 ? 360 : 640;
+  const geometry = rateGeometry(window.points, width);
+  const last = window.points.at(-1);
+  const pair = `${row.currency} / ${state.data.base}`;
+  const plotWidth = width - 120;
+  const chart = geometry && window.observations > 1 ? `<svg class="fx-chart" viewBox="0 0 ${width} 164" role="img" aria-label="${pair}: ${dateLabel(window.points[0].date)} — ${dateLabel(last.date)}, ${rateNumber(window.points[0].rate)} — ${rateNumber(last.rate)}">${geometry.ticks.map(tick => `<line class="chart-grid" x1="0" x2="${plotWidth}" y1="${tick.y}" y2="${tick.y}"/><text class="chart-label" x="${plotWidth + 12}" y="${tick.y + 4}">${rateNumber(tick.value, 4)}</text>`).join('')}<path class="chart-line" d="${geometry.path}"/><circle class="chart-end" cx="${geometry.endpoint.x}" cy="${geometry.endpoint.y}" r="4"/>${geometry.samples.map(point => `<circle class="chart-hover-point" cx="${point.x}" cy="${point.y}" r="6"><title>${dateLabel(point.date, true)}: ${rateNumber(point.rate)} ${state.data.base}${point.rateDate !== point.date ? ` · курс от ${dateLabel(point.rateDate)}` : ''}</title></circle>`).join('')}${geometry.labels.map((label, index) => `<text class="chart-label" x="${label.x}" y="160" text-anchor="${index === 0 ? 'start' : index === geometry.labels.length - 1 ? 'end' : 'middle'}">${dateLabel(label.date)}</text>`).join('')}</svg>` : `<div class="fx-empty">${geometry ? `Пока одна котировка — от ${dateLabel(window.latestQuote.rateDate ?? window.latestQuote.date, true)} График появится после следующих обновлений.` : 'Для этой валютной пары пока нет сохранённых курсов.'}</div>`;
+  const quotes = window.points.filter((point, index, points) => index === 0 || point.rateDate !== points[index - 1].rateDate || point.rate !== points[index - 1].rate);
+  return `<article class="fx-row"><div class="fx-row-heading"><div><h3>${pair}</h3><p>${escape(currencyNames.of(row.currency))}</p></div><div class="fx-quote"><strong>${rateNumber(row.rate)}${row.rate !== null ? ` ${state.data.base}` : ''}</strong><span>${row.rate !== null && last?.rateDate ? `за 1 ${row.currency} · курс от ${dateLabel(last.rateDate)}` : `за 1 ${row.currency}`}</span></div></div><div class="fx-row-body"><div>${chart}</div><dl class="fx-metrics"><div><dt>Изменение курса</dt><dd class="${window.changePercent < 0 ? 'negative' : window.changePercent > 0 ? 'positive' : ''}">${ratePercent(window.changePercent)}</dd>${window.points.length ? `<small>${dateLabel(window.points[0].date)} — ${dateLabel(last.date)}</small>` : ''}</div><div><dt>Вклад в переоценку</dt><dd class="${!state.hidden && row.fx < 0 ? 'negative' : !state.hidden && row.fx > 0 ? 'positive' : ''}">${signed(row.fx)}</dd></div></dl></div>${quotes.length ? `<details class="fx-data"><summary>Данные графика</summary><div class="fx-table-wrap"><table><thead><tr><th>Дата курса</th><th>1 ${row.currency}, ${state.data.base}</th></tr></thead><tbody>${quotes.map(point => `<tr><td>${dateLabel(point.rateDate ?? point.date, true)}</td><td>${rateNumber(point.rate)}</td></tr>`).join('')}</tbody></table></div></details>` : ''}</article>`;
+}
+
+function currencyCharts() {
+  const data = state.data;
+  const period = `<div class="segmented" aria-label="Период графиков курсов">${[[30, '1М'], [90, '3М'], [180, '6М'], [365, '1Г']].map(([days, label]) => `<button data-action="fx-period" data-period="${days}" aria-pressed="${state.fxPeriod === days}" class="${state.fxPeriod === days ? 'selected' : ''}">${label}</button>`).join('')}</div>`;
+  return `<section class="fx-section" aria-labelledby="fx-title"><div class="section-heading"><div><h2 id="fx-title">Курсы валют</h2><p class="subtle">${data.history.length ? `Вклад в переоценку с ${dateLabel(data.history[0].date, true)} по ${dateLabel(today(), true)}` : 'Стоимость валют относительно основной'}</p></div>${data.fxHistory.length ? period : ''}</div>${data.fxHistory.length ? data.fxHistory.map(currencyChart).join('') : `<p class="subtle fx-empty">${data.accounts.length ? `Все счета в ${data.base}. Валютной переоценки нет.` : 'Добавьте счёт в иностранной валюте, чтобы отслеживать курс.'}</p>`}${data.change.fx === null && data.fxHistory.length ? '<p class="field-help">Общее влияние курсов недоступно: не для всех сумм есть курсы на начало или конец периода.</p>' : ''}</section>`;
+}
+
 function journal() {
   const rows = state.data.journal;
-  return `${heading('История остатков', 'Исправления сохраняются отдельными записями.', false)}<div class="history-toolbar"><span class="subtle">${rows.length} ${plural(rows.length, ['запись', 'записи', 'записей'])} · новые сверху</span><button class="button secondary" data-action="csv">${icon('download')}Скачать CSV</button></div>${rows.length ? `<div class="journal-list">${rows.map(row => {
+  const counts = new Map();
+  rows.forEach(row => counts.set(row.account_id, (counts.get(row.account_id) ?? 0) + 1));
+  return `${heading('История остатков', 'Изменение и удаление записей пересчитывают историю капитала.', false)}<div class="history-toolbar"><span class="subtle">${rows.length} ${plural(rows.length, ['запись', 'записи', 'записей'])} · новые сверху</span><button class="button secondary" data-action="csv">${icon('download')}Скачать CSV</button></div>${rows.length ? `<div class="journal-list">${rows.map(row => {
     const corrected = rows.some(other => other.account_id === row.account_id && other.date === row.date && other.id > row.id);
-    return `<article class="journal-row ${corrected ? 'superseded' : ''}"><span class="journal-icon">${icon(corrected ? 'edit' : 'refresh')}</span><div><strong>${escape(row.name)}${row.archived ? '<span class="tag">Архив</span>' : ''}</strong>${row.note || corrected ? `<p>${escape(row.note || 'Заменено более поздним обновлением за эту дату')}</p>` : ''}<small>Записано ${dateLabel(row.created_at, true)}</small></div><div class="journal-amount"><strong>${money(row.amount, row.currency)}</strong><span>на ${dateLabel(row.date, true)}</span></div></article>`;
+    const sole = counts.get(row.account_id) === 1;
+    return `<article id="journal-entry-${row.id}" class="journal-row ${corrected ? 'superseded' : ''}"><span class="journal-icon">${icon(corrected ? 'edit' : 'refresh')}</span><div class="journal-description"><strong>${escape(row.name)}${row.archived ? '<span class="tag">Архив</span>' : ''}${corrected ? '<span class="tag">Заменено</span>' : ''}</strong>${row.note ? `<p>${escape(row.note)}</p>` : ''}<small>Записано ${dateLabel(row.created_at, true)}</small></div><div class="journal-amount"><strong>${money(row.amount, row.currency)}</strong><span>на ${dateLabel(row.date, true)}</span></div><div class="journal-actions"><button class="icon-button" data-action="edit-entry" data-id="${row.id}" aria-label="Редактировать запись ${escape(row.name)} от ${dateLabel(row.date, true)}" title="Редактировать запись">${icon('edit')}</button><button class="icon-button danger-quiet" data-action="delete-entry-confirm" data-id="${row.id}" aria-label="Удалить запись ${escape(row.name)} от ${dateLabel(row.date, true)}" title="${sole ? 'Единственную запись счёта можно только отредактировать' : 'Удалить запись'}" ${sole ? 'disabled' : ''}>${icon('trash')}</button></div></article>`;
   }).join('')}</div>` : empty('Нет записей', 'Добавьте счёт или обновите остаток.')}`;
 }
 
@@ -249,7 +278,7 @@ function render() {
   let content = '';
   if (state.page === 'overview') content = `${heading('Обзор капитала', fullDate(new Date().toISOString()))}${warning()}${capitalSummary()}<div class="overview-grid">${chart()}${allocation()}</div>${accountsSection(true)}`;
   if (state.page === 'accounts') content = `${heading('Счета')}${warning()}${accountsSection()}`;
-  if (state.page === 'analytics') content = `${heading('Аналитика', '', false)}${warning()}${capitalSummary()}<div class="overview-grid">${chart()}${allocation()}</div>${changeDetails()}<div class="currency-detail-list">${data.currencies.map((row, index) => `<div><span class="currency-code">${row.currency}</span><span>${escape(currencyNames.of(row.currency))}</span><strong>${money(row.amount, row.currency)}</strong><span>≈ ${money(row.value)}</span></div>`).join('')}</div>`;
+  if (state.page === 'analytics') content = `${heading('Аналитика', '', false)}${warning()}${capitalSummary()}<div class="overview-grid">${chart()}${allocation()}</div>${changeDetails()}<div class="currency-detail-list">${data.currencies.map(row => `<div><span class="currency-code">${row.currency}</span><span>${escape(currencyNames.of(row.currency))}</span><strong>${money(row.amount, row.currency)}</strong><span>≈ ${money(row.value)}</span></div>`).join('')}</div>${currencyCharts()}`;
   if (state.page === 'history') content = journal();
   if (state.page === 'settings') content = settings();
   root.innerHTML = shell(content);
@@ -270,9 +299,24 @@ function showDialog(title, content) {
   dialog.showModal();
 }
 
-function amountFields(account) {
+function amountFields(account, entry = {}) {
   const digits = new Intl.NumberFormat('ru', { style: 'currency', currency: account?.currency ?? state.data.base }).resolvedOptions().maximumFractionDigits;
-  return `<label><span class="amount-label">Остаток, ${account?.currency ?? state.data.base}</span><input name="amount" inputmode="decimal" type="text" required autocomplete="off" placeholder="0${digits ? `,${'0'.repeat(digits)}` : ''}" value="${account ? account.amount : ''}"></label><label>На дату<input name="date" type="date" min="2000-01-01" max="${today()}" value="${today()}" required></label><label>Заметка <span class="optional">необязательно</span><input name="note" maxlength="500" placeholder="Например, после зарплаты"></label>`;
+  return `<label><span class="amount-label">Остаток, ${account?.currency ?? state.data.base}</span><input name="amount" inputmode="decimal" type="text" required autocomplete="off" placeholder="0${digits ? `,${'0'.repeat(digits)}` : ''}" value="${account ? account.amount : ''}"></label><label>На дату<input name="date" type="date" min="2000-01-01" max="${entry.maxDate ?? today()}" value="${entry.date ?? today()}" required></label><label>Заметка <span class="optional">необязательно</span><input name="note" maxlength="500" placeholder="Например, после зарплаты" value="${escape(entry.note ?? '')}"></label>`;
+}
+
+function historyDialog(id, deleting = false) {
+  const row = state.data.journal.find(entry => String(entry.id) === id);
+  if (!row) return;
+  const account = state.data.archived.find(entry => entry.id === row.account_id);
+  const corrected = state.data.journal.some(entry => entry.account_id === row.account_id && entry.date === row.date && entry.id > row.id);
+  const description = `<p class="dialog-intro">${escape(row.name)} · ${row.currency}${deleting ? ` · ${dateLabel(row.date, true)}` : ''}</p>`;
+  if (deleting) {
+    showDialog('Удалить запись?', `${description}<p class="delete-summary">${money(row.amount, row.currency)}</p><p class="field-help">Остаток и история капитала пересчитаются по оставшимся записям. Удаление нельзя отменить.</p><form id="delete-entry-form" data-id="${id}"><p class="form-error" role="alert"></p><div class="dialog-footer"><button type="button" class="button secondary" data-action="close">Отмена</button><button class="button danger">Удалить запись</button></div></form>`);
+    dialog.querySelector('[data-action="close"].button').focus();
+  } else {
+    showDialog('Редактировать запись', `${description}<form id="history-form" data-id="${id}">${amountFields(row, { ...row, maxDate: account?.archived_at ?? today() })}<p class="field-help">Введите полный остаток, не разницу. Для одной даты действует запись, добавленная последней.${corrected ? ' Эта запись сейчас заменена более поздней.' : ''}</p><p class="form-error" role="alert"></p><div class="dialog-footer"><button type="button" class="button secondary" data-action="close">Отмена</button><button class="button primary">Сохранить изменения</button></div></form>`);
+    dialog.querySelector('[name="amount"]').focus();
+  }
 }
 
 function addDialog() {
@@ -309,8 +353,11 @@ document.addEventListener('click', async event => {
     if (action === 'add') { addDialog(); return; }
     if (action === 'balance') { balanceDialog(button.dataset.id); return; }
     if (action === 'edit') { editDialog(button.dataset.id); return; }
+    if (action === 'edit-entry') { historyDialog(button.dataset.id); return; }
+    if (action === 'delete-entry-confirm') { historyDialog(button.dataset.id, true); return; }
     if (action === 'privacy') { state.hidden = !state.hidden; sessionStorage.setItem('svod-hidden', state.hidden); render(); return; }
     if (action === 'period') { state.period = Number(button.dataset.period); render(); return; }
+    if (action === 'fx-period') { state.fxPeriod = Number(button.dataset.period); render(); return; }
     if (action === 'base') { state.page = 'settings'; location.hash = 'settings'; return; }
     if (action === 'archive-confirm') {
       const account = state.data.accounts.find(row => row.id === button.dataset.id);
@@ -336,7 +383,7 @@ document.addEventListener('click', async event => {
 
 document.addEventListener('submit', async event => {
   const form = event.target;
-  if (!['auth-form', 'account-form', 'balance-form', 'edit-form', 'base-form', 'password-form'].includes(form.id)) return;
+  if (!['auth-form', 'account-form', 'balance-form', 'edit-form', 'history-form', 'delete-entry-form', 'base-form', 'password-form'].includes(form.id)) return;
   event.preventDefault();
   const body = Object.fromEntries(new FormData(form));
   const errorElement = form.querySelector('.form-error');
@@ -346,12 +393,20 @@ document.addEventListener('submit', async event => {
   if (body.confirm !== undefined && body.confirm !== body.password) { errorElement.textContent = 'Пароли не совпадают'; errorElement.scrollIntoView({ block: 'nearest' }); return; }
   submit.disabled = true; form.setAttribute('aria-busy', 'true');
   submit.setAttribute('aria-busy', 'true');
-  submit.innerHTML = `<span class="button-label">${submitLabel}</span><span class="button-pending">${form.id === 'auth-form' ? 'Открываем…' : 'Сохраняем…'}</span>`;
+  submit.innerHTML = `<span class="button-label">${submitLabel}</span><span class="button-pending">${form.id === 'auth-form' ? 'Открываем…' : form.id === 'delete-entry-form' ? 'Удаляем…' : 'Сохраняем…'}</span>`;
   try {
     if (form.id === 'auth-form') { await api(form.dataset.initialized === 'true' ? '/login' : '/setup', { method: 'POST', body }); await load(); }
     if (form.id === 'account-form') { await api('/accounts', { method: 'POST', body }); dialog.close(); await load(); toast('Счёт добавлен'); }
     if (form.id === 'balance-form') { await api(`/accounts/${form.dataset.id}/balances`, { method: 'POST', body }); dialog.close(); await load(); toast('Новый остаток сохранён'); }
     if (form.id === 'edit-form') { await api(`/accounts/${form.dataset.id}`, { method: 'PATCH', body }); dialog.close(); await load(); toast('Счёт обновлён'); }
+    if (form.id === 'history-form' || form.id === 'delete-entry-form') {
+      const deleting = form.id === 'delete-entry-form';
+      await api(`/balances/${form.dataset.id}`, { method: deleting ? 'DELETE' : 'PATCH', body });
+      dialog.close(); await load();
+      const target = deleting ? root.querySelector('.journal-actions button:not(:disabled)') : root.querySelector(`[data-action="edit-entry"][data-id="${CSS.escape(form.dataset.id)}"]`);
+      target?.focus({ preventScroll: true });
+      toast(deleting ? 'Запись удалена. История пересчитана.' : 'Запись изменена. История пересчитана.');
+    }
     if (form.id === 'base-form') { await api('/settings', { method: 'PUT', body }); await load(); toast('Основная валюта изменена'); }
     if (form.id === 'password-form') { await api('/password', { method: 'PUT', body }); state.data = null; renderAuth(true); toast('Пароль изменён. Войдите снова.'); }
   } catch (error) { errorElement.textContent = error.message; errorElement.scrollIntoView({ block: 'nearest' }); }

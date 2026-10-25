@@ -92,3 +92,24 @@ test('provider failure preserves cache, invalid data is rejected and retries are
   for (let index = 0; index < 5; index++) await request('/api/login', 'POST', { password: 'wrong' });
   assert.equal((await request('/api/login', 'POST', { password: 'wrong' })).status, 429);
 }));
+
+test('history mutations require authentication and same origin and recalculate dashboard data', async () => fixture(async ({ request }) => {
+  assert.equal((await request('/api/balances/1', 'PATCH', { amount: '99' })).status, 401);
+  assert.equal((await request('/api/balances/1', 'DELETE', {})).status, 401);
+  await request('/api/setup', 'POST', { token: 'test-bootstrap-token', password: 'long-password-123' });
+  const created = await request('/api/accounts', 'POST', { name: 'Cash', currency: 'RUB', amount: '100', date: '2026-10-20' });
+  await request(`/api/accounts/${created.data.id}/balances`, 'POST', { amount: '200', date: '2026-10-21' });
+  const row = (await request('/api/data')).data.journal[0];
+  for (const method of ['PATCH', 'DELETE']) {
+    assert.equal((await request(`/api/balances/${row.id}`, method, { amount: '300' }, { origin: 'https://attacker.example' })).status, 403);
+  }
+  assert.equal((await request(`/api/balances/${row.id}`, 'PATCH', { amount: '300', date: '2026-10-22', note: 'Corrected' })).status, 200);
+  assert.equal((await request('/api/data')).data.total, 300);
+  assert.equal((await request(`/api/balances/${row.id}`, 'PATCH', { amount: 'NaN' })).status, 400);
+  assert.equal((await request(`/api/balances/${row.id}`, 'DELETE', {})).status, 200);
+  const after = (await request('/api/data')).data;
+  assert.equal(after.total, 100);
+  assert.equal(after.journal.length, 1);
+  assert.equal((await request(`/api/balances/${after.journal[0].id}`, 'DELETE', {})).status, 400);
+  assert.equal((await request('/api/export')).data.balances.length, 1);
+}));
