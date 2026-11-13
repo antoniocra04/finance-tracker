@@ -132,7 +132,8 @@
   .chart-indicator line { stroke: var(--muted); stroke-dasharray: 3 4; vector-effect: non-scaling-stroke; }
   .chart-indicator circle { fill: var(--chart); stroke: var(--bg); stroke-width: 2; }
   .fx-chart .chart-indicator circle { fill: var(--ink); }
-  .chart-tooltip { position: absolute; top: 0; max-width: 100%; padding: 6px 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); color: var(--ink); pointer-events: none; font-size: .875rem; font-variant-numeric: tabular-nums; }
+  .chart-readout { min-height: 3.75rem; padding-bottom: 8px; }
+  .chart-tooltip { width: fit-content; max-width: 100%; padding: 4px 8px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); color: var(--ink); font-size: .875rem; line-height: 1.35; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
   .chart-tooltip span, .chart-tooltip strong { display: block; }
   .chart-tooltip span { color: var(--muted); }
   .chart-announcement { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }

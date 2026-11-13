@@ -143,12 +143,14 @@ function capitalSummary() {
 function chartPlot(key, points, { svgClass, width, height, right, top, bottom, label, content }) {
   chartPoints.set(key, points);
   return `<div class="interactive-chart" data-chart="${key}" tabindex="0" role="group" aria-label="Значения графика: используйте стрелки влево и вправо">
+    <div class="chart-readout" aria-hidden="true">
+      <div class="chart-tooltip" hidden><span></span><strong></strong></div>
+    </div>
     <svg class="${svgClass}" viewBox="0 0 ${width} ${height}" role="img" aria-label="${escape(label)}">
       ${content}
       <g class="chart-indicator" visibility="hidden" aria-hidden="true"><line y1="${top}" y2="${bottom}"/><circle r="4.5"/></g>
       <rect class="chart-hit-area" x="0" y="${top}" width="${right}" height="${bottom - top}" aria-hidden="true"/>
     </svg>
-    <div class="chart-tooltip" hidden aria-hidden="true"><span></span><strong></strong></div>
     <span class="chart-announcement" role="status"></span>
   </div>`;
 }

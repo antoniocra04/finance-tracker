@@ -43,8 +43,6 @@ export function bindChart(plot, points) {
   function show(index, announce = false) {
     if (index < 0) { hide(); return; }
     if (index === selected && !announce) return;
-    const matrix = svg.getScreenCTM();
-    if (!matrix) return;
     selected = index;
     const point = points[index];
     guide.setAttribute('x1', point.x);
@@ -58,10 +56,6 @@ export function bindChart(plot, points) {
     date.textContent = point.label;
     value.textContent = point.value;
     tooltip.hidden = false;
-    const bounds = plot.getBoundingClientRect();
-    const anchor = new DOMPoint(point.x, 0).matrixTransform(matrix);
-    const width = tooltip.offsetWidth;
-    tooltip.style.left = `${Math.max(0, Math.min(bounds.width - width, anchor.x - bounds.left - width / 2))}px`;
     if (announce) announcement.textContent = `${point.label}: ${point.value}`;
   }
 
