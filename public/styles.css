@@ -126,14 +126,21 @@
   .chart-label { fill: var(--muted); font-size: 11px; font-variant-numeric: tabular-nums; }
   .chart-line { fill: none; stroke: var(--chart); stroke-width: 2.5; stroke-linejoin: round; stroke-linecap: round; }
   .chart-end { fill: var(--chart); stroke: var(--bg); stroke-width: 2; }
-  .chart-hover-point { fill: transparent; stroke: transparent; }
-  .chart-hover-point:hover { fill: var(--chart); stroke: var(--bg); stroke-width: 2; }
+  .interactive-chart { position: relative; min-width: 0; }
+  .chart-hit-area { fill: transparent; cursor: crosshair; touch-action: pan-y; }
+  .chart-indicator { pointer-events: none; }
+  .chart-indicator line { stroke: var(--muted); stroke-dasharray: 3 4; vector-effect: non-scaling-stroke; }
+  .chart-indicator circle { fill: var(--chart); stroke: var(--bg); stroke-width: 2; }
+  .fx-chart .chart-indicator circle { fill: var(--ink); }
+  .chart-tooltip { position: absolute; top: 0; max-width: 100%; padding: 6px 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); color: var(--ink); pointer-events: none; font-size: .875rem; font-variant-numeric: tabular-nums; }
+  .chart-tooltip span, .chart-tooltip strong { display: block; }
+  .chart-tooltip span { color: var(--muted); }
+  .chart-announcement { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
   .chart-caption { display: flex; align-items: center; gap: 7px; color: var(--muted); font-size: .72rem; margin-top: 17px; }
   .chart-empty { min-height: 230px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 9px; color: var(--muted); text-align: center; padding: 24px; }
   .chart-empty > .icon { width: 26px; height: 26px; color: oklch(0.63 0.05 91); margin-bottom: 8px; }
   .chart-empty strong { color: var(--ink); font-weight: 500; }
   .chart-empty p { max-width: 36ch; font-size: .82rem; }
-  .first-point { font-size: .8rem; background: var(--primary-pale); color: var(--ink); padding: 4px 10px; border-radius: 5px; margin-top: 5px; }
   .donut-wrap { width: 160px; height: 160px; margin: -9px auto 11px; position: relative; }
   .donut { display: block; width: 100%; transform: rotate(-90deg); }
   .donut circle { fill: none; stroke-width: 17; }

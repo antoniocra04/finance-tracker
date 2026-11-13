@@ -1,7 +1,9 @@
 import { rateWindow, rateGeometry } from './fx.mjs';
+import { bindChart, dateAxis, periodRange } from './chart.mjs';
 
 const root = document.querySelector('#app');
 const dialog = document.querySelector('#dialog');
+const chartPoints = new Map();
 const paths = {
   overview: '<rect width="7" height="9" x="3" y="3" rx="1" /><rect width="7" height="5" x="14" y="3" rx="1" /><rect width="7" height="9" x="14" y="12" rx="1" /><rect width="7" height="5" x="3" y="16" rx="1" />',
   accounts: '<path d="M3 11h3.75a2 2 0 0 1 1.6.8l.45.6a4 4 0 0 0 6.4 0l.45-.6a2 2 0 0 1 1.6-.8H21" /><path d="M3 7h18" /><rect x="3" y="3" width="18" height="18" rx="2" />',
@@ -138,40 +140,60 @@ function capitalSummary() {
   return `<section class="capital-summary" aria-label="Общий капитал"><div class="total-block"><div class="total-label">Общий капитал <button class="currency-switch" data-action="base" title="Сменить основную валюту">${data.base}${icon('chevron')}</button></div><div class="total-value">${money(data.total)}</div><div class="total-change ${data.change.total < 0 ? 'negative' : ''}">${data.change.total !== null ? `${icon(data.change.total < 0 ? 'arrowDown' : 'arrow')}<strong>${signed(data.change.total)}</strong><span>${start ? `с ${dateLabel(start)}` : 'за время наблюдений'}</span>` : '<span>История появится по мере наблюдений</span>'}</div></div><div class="summary-facts"><div><span>Счета</span><strong>${data.accounts.length}</strong></div><div><span>Валюты</span><strong>${data.currencies.length}<small>${data.currencies.map(row => row.currency).join(' / ') || 'пока нет'}</small></strong></div></div></section>`;
 }
 
+function chartPlot(key, points, { svgClass, width, height, right, top, bottom, label, content }) {
+  chartPoints.set(key, points);
+  return `<div class="interactive-chart" data-chart="${key}" tabindex="0" role="group" aria-label="Значения графика: используйте стрелки влево и вправо">
+    <svg class="${svgClass}" viewBox="0 0 ${width} ${height}" role="img" aria-label="${escape(label)}">
+      ${content}
+      <g class="chart-indicator" visibility="hidden" aria-hidden="true"><line y1="${top}" y2="${bottom}"/><circle r="4.5"/></g>
+      <rect class="chart-hit-area" x="0" y="${top}" width="${right}" height="${bottom - top}" aria-hidden="true"/>
+    </svg>
+    <div class="chart-tooltip" hidden aria-hidden="true"><span></span><strong></strong></div>
+    <span class="chart-announcement" role="status"></span>
+  </div>`;
+}
+
+function chartLabels(labels, y) {
+  const spansYears = labels[0].date.slice(0, 4) !== labels.at(-1).date.slice(0, 4);
+  const format = date => spansYears ? date.slice(2).split('-').reverse().join('.') : dateLabel(date);
+  return labels.map((label, index) => `<text class="chart-label" x="${label.x}" y="${y}" text-anchor="${index === 0 ? 'start' : index === labels.length - 1 ? 'end' : 'middle'}">${format(label.date)}</text>`).join('');
+}
+
 function chart() {
   const data = state.data;
-  const cutoff = new Date(); cutoff.setUTCDate(cutoff.getUTCDate() - state.period);
-  const history = data.history.filter(point => point.date >= cutoff.toISOString().slice(0, 10));
+  const range = periodRange(state.period, today());
+  const history = data.history.filter(point => point.date >= range.start && point.date <= range.end);
   const valid = history.filter(point => point.total !== null);
   const toolbar = `<div class="section-heading"><div><h2>Динамика капитала</h2></div><div class="segmented" aria-label="Период графика">${[[30, '1М'], [90, '3М'], [180, '6М'], [365, '1Г']].map(([period, label]) => `<button data-action="period" data-period="${period}" aria-pressed="${state.period === period}" class="${state.period === period ? 'selected' : ''}">${label}</button>`).join('')}</div></div>`;
   if (state.hidden) return `<section class="chart-section">${toolbar}<div class="chart-empty">${icon('eye')}Суммы скрыты</div></section>`;
-  if (valid.length < 2) return `<section class="chart-section">${toolbar}<div class="chart-empty">${icon('analytics')}<strong>${valid.length ? 'Первая точка уже есть' : 'Здесь будет ваша история'}</strong><p>${valid.length ? 'Завтра появится следующая: курсы обновляются автоматически.' : 'Добавьте счёт. График начнётся с первого доступного остатка и курса.'}</p>${valid.length ? `<span class="first-point">${money(valid[0].total)} · ${dateLabel(valid[0].date)}</span>` : ''}</div></section>`;
-  const width = window.innerWidth <= 580 ? 400 : 720, height = 230, left = 0, right = width - 100, top = 25, bottom = 195;
+  if (!valid.length) return `<section class="chart-section">${toolbar}<div class="chart-empty">${icon('analytics')}<strong>Нет данных за выбранный период</strong><p>График начнётся с первого доступного остатка и курса.</p></div></section>`;
+  const width = window.innerWidth <= 580 ? 400 : 720, height = 230, right = width - 100, top = 25, bottom = 195;
+  const axis = dateAxis(range, right);
   const values = valid.map(point => point.total);
   let minimum = Math.min(...values), maximum = Math.max(...values);
   const padding = Math.max((maximum - minimum) * 0.2, maximum * 0.025, 1);
   minimum = Math.max(0, minimum - padding); maximum += padding;
-  const position = (point, index) => [left + index / Math.max(history.length - 1, 1) * right, bottom - (point.total - minimum) / (maximum - minimum) * (bottom - top)];
+  const points = history.map(point => ({
+    x: axis.x(point.date), y: point.total === null ? null : bottom - (point.total - minimum) / (maximum - minimum) * (bottom - top),
+    label: dateLabel(point.date, true), value: point.total === null ? 'Нет данных' : money(point.total)
+  }));
   let line = '', segment = false;
-  history.forEach((point, index) => {
-    if (point.total === null) { segment = false; return; }
-    const [horizontal, vertical] = position(point, index);
-    line += `${segment ? 'L' : 'M'}${horizontal.toFixed(2)},${vertical.toFixed(2)} `; segment = true;
+  points.forEach(point => {
+    if (point.y === null) { segment = false; return; }
+    line += `${segment ? 'L' : 'M'}${point.x.toFixed(2)},${point.y.toFixed(2)} `; segment = true;
   });
   const grids = [0, 1, 2, 3].map(index => {
     const vertical = top + (bottom - top) / 3 * index;
     const value = maximum - (maximum - minimum) / 3 * index;
     return `<line class="chart-grid" x1="0" y1="${vertical}" x2="${right}" y2="${vertical}"/><text class="chart-label" x="${right + 18}" y="${vertical + 4}">${escape(new Intl.NumberFormat('ru', { notation: 'compact', maximumFractionDigits: 1 }).format(value))}</text>`;
   }).join('');
-  const labels = [...new Set([0, Math.floor((history.length - 1) / 2), history.length - 1])].map(index => `<text class="chart-label" x="${index / (history.length - 1) * right}" y="225" text-anchor="${index === 0 ? 'start' : index === history.length - 1 ? 'end' : 'middle'}">${dateLabel(history[index].date)}</text>`).join('');
-  const points = history.map((point, index) => {
-    if (point.total === null) return '';
-    const [horizontal, vertical] = position(point, index);
-    return `<circle class="chart-hover-point" cx="${horizontal}" cy="${vertical}" r="5"><title>${dateLabel(point.date, true)}: ${money(point.total)}</title></circle>`;
-  }).join('');
-  const lastIndex = history.findLastIndex(point => point.total !== null);
-  const [endX, endY] = position(history[lastIndex], lastIndex);
-  return `<section class="chart-section">${toolbar}<div class="chart-wrap"><svg class="capital-chart" viewBox="0 0 ${width} ${height}" role="img" aria-label="Капитал с ${dateLabel(history[0].date)} по ${dateLabel(history.at(-1).date)}: от ${money(valid[0].total)} до ${money(valid.at(-1).total)}">${grids}<path class="chart-line" d="${line}"/><circle class="chart-end" cx="${endX}" cy="${endY}" r="4.5"/>${points}${labels}</svg></div><div class="chart-caption"><span class="legend-dot color-0"></span>Капитал в ${data.base}</div></section>`;
+  const end = points.findLast(point => point.y !== null);
+  const plot = chartPlot('capital', points, {
+    svgClass: 'capital-chart', width, height, right, top, bottom,
+    label: `Капитал с ${dateLabel(range.start, true)} по ${dateLabel(range.end, true)}`,
+    content: `${grids}<path class="chart-line" d="${line}"/><circle class="chart-end" cx="${end.x}" cy="${end.y}" r="4.5"/>${chartLabels(axis.labels, 225)}`
+  });
+  return `<section class="chart-section">${toolbar}<div class="chart-wrap">${plot}</div><div class="chart-caption"><span class="legend-dot color-0"></span>Капитал в ${data.base}</div></section>`;
 }
 
 function allocation() {
@@ -214,11 +236,18 @@ function currencyChart(series) {
   const row = state.data.currencies.find(item => item.currency === series.currency);
   const window = rateWindow(series.points, state.fxPeriod, today());
   const width = innerWidth <= 580 ? 360 : 640;
-  const geometry = rateGeometry(window.points, width);
+  const geometry = rateGeometry(window.points, width, window.range);
   const last = window.points.at(-1);
   const pair = `${row.currency} / ${state.data.base}`;
   const plotWidth = width - 120;
-  const chart = geometry && window.observations > 1 ? `<svg class="fx-chart" viewBox="0 0 ${width} 164" role="img" aria-label="${pair}: ${dateLabel(window.points[0].date)} — ${dateLabel(last.date)}, ${rateNumber(window.points[0].rate)} — ${rateNumber(last.rate)}">${geometry.ticks.map(tick => `<line class="chart-grid" x1="0" x2="${plotWidth}" y1="${tick.y}" y2="${tick.y}"/><text class="chart-label" x="${plotWidth + 12}" y="${tick.y + 4}">${rateNumber(tick.value, 4)}</text>`).join('')}<path class="chart-line" d="${geometry.path}"/><circle class="chart-end" cx="${geometry.endpoint.x}" cy="${geometry.endpoint.y}" r="4"/>${geometry.samples.map(point => `<circle class="chart-hover-point" cx="${point.x}" cy="${point.y}" r="6"><title>${dateLabel(point.date, true)}: ${rateNumber(point.rate)} ${state.data.base}${point.rateDate !== point.date ? ` · курс от ${dateLabel(point.rateDate)}` : ''}</title></circle>`).join('')}${geometry.labels.map((label, index) => `<text class="chart-label" x="${label.x}" y="160" text-anchor="${index === 0 ? 'start' : index === geometry.labels.length - 1 ? 'end' : 'middle'}">${dateLabel(label.date)}</text>`).join('')}</svg>` : `<div class="fx-empty">${geometry ? `Пока одна котировка — от ${dateLabel(window.latestQuote.rateDate ?? window.latestQuote.date, true)} График появится после следующих обновлений.` : 'Для этой валютной пары пока нет сохранённых курсов.'}</div>`;
+  const chart = geometry ? chartPlot(row.currency, geometry.positions.map(point => ({
+    x: point.x, y: point.y, label: dateLabel(point.date, true),
+    value: point.y === null ? 'Нет курса' : `${rateNumber(point.rate)} ${state.data.base}${point.rateDate && point.rateDate !== point.date ? ` · курс от ${dateLabel(point.rateDate)}` : ''}`
+  })), {
+    svgClass: 'fx-chart', width, height: 164, right: plotWidth, top: 12, bottom: 128,
+    label: `${pair}: ${dateLabel(window.range.start, true)} — ${dateLabel(window.range.end, true)}`,
+    content: `${geometry.ticks.map(tick => `<line class="chart-grid" x1="0" x2="${plotWidth}" y1="${tick.y}" y2="${tick.y}"/><text class="chart-label" x="${plotWidth + 12}" y="${tick.y + 4}">${rateNumber(tick.value, 4)}</text>`).join('')}<path class="chart-line" d="${geometry.path}"/><circle class="chart-end" cx="${geometry.endpoint.x}" cy="${geometry.endpoint.y}" r="4"/>${chartLabels(geometry.labels, 160)}`
+  }) : '<div class="fx-empty">Для этой валютной пары пока нет сохранённых курсов за выбранный период.</div>';
   const quotes = window.points.filter((point, index, points) => index === 0 || point.rateDate !== points[index - 1].rateDate || point.rate !== points[index - 1].rate);
   return `<article class="fx-row"><div class="fx-row-heading"><div><h3>${pair}</h3><p>${escape(currencyNames.of(row.currency))}</p></div><div class="fx-quote"><strong>${rateNumber(row.rate)}${row.rate !== null ? ` ${state.data.base}` : ''}</strong><span>${row.rate !== null && last?.rateDate ? `за 1 ${row.currency} · курс от ${dateLabel(last.rateDate)}` : `за 1 ${row.currency}`}</span></div></div><div class="fx-row-body"><div>${chart}</div><dl class="fx-metrics"><div><dt>Изменение курса</dt><dd class="${window.changePercent < 0 ? 'negative' : window.changePercent > 0 ? 'positive' : ''}">${ratePercent(window.changePercent)}</dd>${window.points.length ? `<small>${dateLabel(window.points[0].date)} — ${dateLabel(last.date)}</small>` : ''}</div><div><dt>Вклад в переоценку</dt><dd class="${!state.hidden && row.fx < 0 ? 'negative' : !state.hidden && row.fx > 0 ? 'positive' : ''}">${signed(row.fx)}</dd></div></dl></div>${quotes.length ? `<details class="fx-data"><summary>Данные графика</summary><div class="fx-table-wrap"><table><thead><tr><th>Дата курса</th><th>1 ${row.currency}, ${state.data.base}</th></tr></thead><tbody>${quotes.map(point => `<tr><td>${dateLabel(point.rateDate ?? point.date, true)}</td><td>${rateNumber(point.rate)}</td></tr>`).join('')}</tbody></table></div></details>` : ''}</article>`;
 }
@@ -273,6 +302,7 @@ function render() {
   const focusPeriod = focused?.dataset?.period;
   const focusAccount = focused?.dataset?.id;
   if (!navItems.some(([id]) => id === state.page)) state.page = 'overview';
+  chartPoints.clear();
   const data = state.data;
   document.title = `${navItems.find(([id]) => id === state.page)[1]} · Свод`;
   let content = '';
@@ -282,6 +312,7 @@ function render() {
   if (state.page === 'history') content = journal();
   if (state.page === 'settings') content = settings();
   root.innerHTML = shell(content);
+  root.querySelectorAll('[data-chart]').forEach(plot => bindChart(plot, chartPoints.get(plot.dataset.chart)));
   if (focusAction) {
     const selector = `[data-action="${CSS.escape(focusAction)}"]${focusPeriod ? `[data-period="${CSS.escape(focusPeriod)}"]` : ''}${focusAccount ? `[data-id="${CSS.escape(focusAccount)}"]` : ''}`;
     root.querySelector(selector)?.focus({ preventScroll: true });

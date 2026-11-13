@@ -9,7 +9,7 @@ import { currencyCodes } from './money.mjs';
 const scrypt = promisify(scryptCallback);
 const hashToken = token => createHash('sha256').update(token).digest('hex');
 const fail = (status, message) => Object.assign(new Error(message), { status });
-const assets = new Map([['/', ['index.html', 'text/html']], ['/app.js', ['app.js', 'text/javascript']], ['/fx.mjs', ['fx.mjs', 'text/javascript']], ['/styles.css', ['styles.css', 'text/css']], ['/icon.svg', ['icon.svg', 'image/svg+xml']]]);
+const assets = new Map([['/', ['index.html', 'text/html']], ['/app.js', ['app.js', 'text/javascript']], ['/fx.mjs', ['fx.mjs', 'text/javascript']], ['/chart.mjs', ['chart.mjs', 'text/javascript']], ['/styles.css', ['styles.css', 'text/css']], ['/icon.svg', ['icon.svg', 'image/svg+xml']]]);
 
 async function passwordHash(password) {
   if (typeof password !== 'string' || password.length < 12 || password.length > 256) throw fail(400, 'Пароль: от 12 до 256 символов');

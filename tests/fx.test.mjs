@@ -76,3 +76,16 @@ test('last valid quotation retains its date when a later snapshot omits that cur
   assert.equal(window.points.at(-1).rate, null);
   assert.equal(window.changePercent, null);
 });
+
+test('a short quote history stays at the right side of the selected period', () => {
+  const points = [
+    { date: '2026-11-10', rate: 90, rateDate: '2026-11-10' },
+    { date: '2026-11-13', rate: 95, rateDate: '2026-11-13' }
+  ];
+  const month = rateWindow(points, 30, '2026-11-13');
+  const geometry = rateGeometry(month.points, 360, month.range);
+  assert.equal(geometry.labels[0].date, '2026-10-14');
+  assert.equal(geometry.samples[0].x, 216);
+  assert.equal(geometry.endpoint.x, 240);
+  assert.equal(month.points[0].date, '2026-11-10');
+});
