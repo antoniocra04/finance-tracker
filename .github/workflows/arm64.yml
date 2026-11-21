@@ -1,0 +1,41 @@
+name: ARM64 build
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@v7
+        with:
+          go-version: 1.26.11
+      - run: go test ./...
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - run: npm --prefix frontend test
+      - run: docker compose config -q
+      - run: docker compose build
+      - name: Check image and export it for Raspberry Pi
+        shell: bash
+        run: |
+          image=$(docker compose config --images)
+          [ "$(docker image inspect --format '{{.Architecture}}' "$image")" = arm64 ]
+          docker save "$image" | gzip -1 > finance-tracker-arm64.tar.gz
+      - uses: actions/upload-artifact@v7
+        with:
+          name: finance-tracker-arm64
+          path: finance-tracker-arm64.tar.gz
+          compression-level: 0

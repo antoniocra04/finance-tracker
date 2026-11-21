@@ -6,3 +6,7 @@ node_modules
 tests
 docs
 .impeccable
+frontend/node_modules
+internal/web/spa/static/generated
+/svod
+*.sqlite*

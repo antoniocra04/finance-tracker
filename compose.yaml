@@ -1,6 +1,7 @@
 services:
   svod:
     build: .
+    platform: linux/arm64
     restart: unless-stopped
     init: true
     ports:

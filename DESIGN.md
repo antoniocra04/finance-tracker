@@ -1,47 +1,11 @@
 # Visual system
 
-## Scene
+Свод uses the shared Home Apps header, navigation, button and typography components with its own warm yellow palette. Onest is served locally. Use tabular numerals for money, quotes and shares.
 
-The owner checks balances on a laptop at a daylight-lit kitchen table, then enters an updated amount on a phone. White surfaces keep numbers legible in both settings.
+The four main sections sit in the header. The overview opens with the capital chart, followed by a distinct currency breakdown and the account table. Settings are available through the base currency control and the settings link on the other main pages.
 
-## Strategy
+On desktop the account table shows the account and institution, type, currency, original balance, converted balance, share of total capital and update date. On small screens the account type sits beside the institution and the converted foreign balance sits below the original balance. Unknown conversions and shares are shown as dashes.
 
-Restrained color. Pure white content, neutral gray shell, warm amber primary anchored at hue 91, dark ink, teal positive state. Currency visualization adds purposeful blue and violet.
+Use real stored balances and quotes for both charts. The axis spans the selected period. Missing data breaks the line, and the pointer or keyboard reveals values along the line. The privacy control hides monetary values and capital shares.
 
-## Tokens
-
-Use OKLCH custom properties. Primary: oklch(0.88 0.15 91), ink: oklch(0.23 0.015 91), muted: oklch(0.49 0.012 91). White canvas and light achromatic sidebar. Amber buttons use dark text on pale fill.
-
-## Typography
-
-System sans, tabular numerals, fixed rem scale. Headers 28px, primary total 44px desktop / 32px mobile. No display fonts. No external font requests.
-
-## Structure
-
-Compact left sidebar, broad content canvas, clear account rows, capital chart and currency breakdown. Dividers separate data rather than nested cards. Radii 8–14px. Native dialogs for focused balance entry and account creation. Fixed bottom navigation on small screens.
-
-No breadcrumb for a flat five-section navigation, promotional footer, version badge, or owner avatar. The top bar contains rate freshness and the privacy toggle. Provider attribution is available by expanding the rate status.
-
-Authentication is a single centered 360px column on white: small brand, task heading, necessary fields, one action. First run says «Настройка доступа» / «Сохранить пароль»; later visits say «Вход» / «Войти». No marketing panel, currency decorations, signup language, or account selection.
-
-## States
-
-Explicit empty, loading, stale rate, missing conversion, validation, saving and failure states. Motion only for interaction feedback, 160ms, disabled under reduced-motion preference.
-
-## Controls and responsive details
-
-Shared inputs and selects are 44px high with 8px corners. Native selects reserve 40px at the trailing edge for a consistent chevron; mobile control text is 16px. Toolbar controls have no top margin, and search icons align to the input's center. Compact desktop row actions are 36px; mobile targets are at least 44px.
-
-Icons use pinned Lucide paths, a 24px viewBox, round caps and joins, and a consistent 2px stroke. Inputs and selects focus with a single 2px frame inside their bounds, never an external second outline. Keyboard focus remains visible on links and buttons; forced-colors mode uses an inset system outline.
-
-Dialogs keep their heading and action footer visible while the body scrolls. Footer submit buttons stay associated with their form. Busy labels preserve button dimensions; validation messages scroll into view with 16px clearance. On phones, currency and account type occupy separate full-width rows.
-
-Mobile account rows show the full name, then the balance and conversion underneath, with actions beside them. Search and sorting stack below 380px. The journal stacks amounts below the entry instead of squeezing three columns. Icon-only tablet navigation retains accessible names. Settings always provide logout, including when the sidebar footer is hidden.
-
-## Currency charts and history actions
-
-Analytics uses stacked, divider-separated foreign-currency charts, not a card grid. Each pair quotes one unit against the current reporting currency. A shared 30/90/180/365-day selector changes quote charts and percentages only; the separately dated contribution matches the aggregate FX observation period. Price lines remain neutral; positive/negative state color belongs to signed changes. Quote values remain visible under the privacy toggle because they are public; private currency contributions are masked.
-
-Sparse dates use calendar-spaced axes. Missing quotes break paths. Single-publication and missing-start states explain why no trend or percentage is available. Expandable tables provide exact observations without requiring hover or exposing account amounts.
-
-History actions use edit and trash Lucide icons with descriptive accessible names. On mobile, 44px actions stack beside the description and amount. The creation timestamp occupies its own line even without a note. Native edit dialogs prefill amount, date and note; deletion names the entry, explains recalculation and irreversibility, and initially focuses Cancel. The sole balance's delete action is disabled with an explanatory title, backed by a server-side guard.
+Authentication uses a centered column for the password form. Account and journal actions use native dialogs with keyboard focus. Keep focus rings visible and provide a separate confirmation for archive and delete actions.

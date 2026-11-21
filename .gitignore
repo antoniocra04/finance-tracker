@@ -6,3 +6,6 @@ backups/
 *.sqlite-wal
 *.sqlite-shm
 .DS_Store
+*.sqlite.lock
+/svod
+/internal/web/spa/static/generated/*

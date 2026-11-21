@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { periodRange, dateAxis, nearestPoint } from '../public/chart.mjs';
+import { periodRange, dateAxis, nearestPoint } from '../frontend/src/chart.mjs';
 
 test('selected period defines the axis even when the first record is recent', () => {
   const month = dateAxis(periodRange(30, '2026-11-13'), 300);
