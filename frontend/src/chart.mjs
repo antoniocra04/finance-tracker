@@ -14,6 +14,25 @@ export function dateAxis({ start, end }, width, ticks = 3) {
   return { x, labels: dates.map(date => ({ date, x: x(date) })) };
 }
 
+/** @param {{ width: number, height: number } | null} measured */
+export function capitalPlotBounds(measured = null, mobile = false) {
+  const baseWidth = mobile ? 320 : 680;
+  const baseHeight = mobile ? 153 : 213;
+  const { width, height } = measured ?? { width: baseWidth, height: baseHeight };
+  const x = width / baseWidth;
+  const y = height / baseHeight;
+  const right = mobile ? 269 : 623;
+  return {
+    width, height,
+    left: (mobile ? 3 : 4) * x,
+    right: right * x,
+    top: (mobile ? 13 : 16) * y,
+    bottom: (mobile ? 128 : 184) * y,
+    valueLabelX: (right + 8) * x,
+    dateLabelY: (baseHeight - 5) * y,
+  };
+}
+
 export function nearestPoint(points, x, tolerance = 0) {
   if (!points.length || !Number.isFinite(x) || x < points[0].x - tolerance || x > points.at(-1).x + tolerance) return -1;
   const next = points.findIndex(point => point.x >= x);

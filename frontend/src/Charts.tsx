@@ -1,19 +1,46 @@
 import { Link } from 'react-router';
-import { useRef, useState, useSyncExternalStore } from 'react';
+import { useLayoutEffect, useRef, useState, useSyncExternalStore } from 'react';
 import type { KeyboardEvent, PointerEvent, ReactNode } from 'react';
 import { buttonClass, Icon } from '@home-apps/ui';
-import { dateAxis, nearestPoint, periodRange } from './chart.mjs';
+import { capitalPlotBounds, dateAxis, nearestPoint, periodRange } from './chart.mjs';
 import { rateGeometry, rateWindow } from './fx.mjs';
 import { currencyNames, dateLabel, longDate, money, share, shareLabel, signClass, signed, today } from './model';
 import type { Allocation, Dashboard, Quote, QuoteSeries } from './model';
 
 const periods = [[30, '1М'], [90, '3М'], [180, '6М'], [365, '1Г']] as const;
-const mobileQuery = matchMedia('(max-width: 580px)');
-function subscribeMobile(listener: () => void) {
-  mobileQuery.addEventListener('change', listener);
-  return () => mobileQuery.removeEventListener('change', listener);
+const mobileQuery = watchMedia('(max-width: 580px)');
+const wideQuery = watchMedia('(min-width: 1100px)');
+function watchMedia(query: string) {
+  const media = matchMedia(query);
+  return {
+    subscribe(listener: () => void) {
+      media.addEventListener('change', listener);
+      return () => media.removeEventListener('change', listener);
+    },
+    getSnapshot: () => media.matches,
+  };
 }
-const getMobile = () => mobileQuery.matches;
+
+type PlotFrame = { width: number; height: number };
+
+function useWidePlotFrame() {
+  const wide = useSyncExternalStore(wideQuery.subscribe, wideQuery.getSnapshot);
+  const [element, setElement] = useState<HTMLDivElement | null>(null);
+  const [size, setSize] = useState<PlotFrame | null>(null);
+  useLayoutEffect(() => {
+    if (!wide || !element) return;
+    function measure({ width, height }: PlotFrame) {
+      if (width > 0 && height > 0) {
+        setSize(current => current?.width === width && current.height === height ? current : { width, height });
+      }
+    }
+    measure(element.getBoundingClientRect());
+    const observer = new ResizeObserver(([entry]) => measure(entry.contentRect));
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [element, wide]);
+  return { frameRef: setElement, size: wide ? size : null };
+}
 const compact = new Intl.NumberFormat('ru', { notation: 'compact', maximumFractionDigits: 2 });
 
 function Period({ label, period, change }: { label: string; period: number; change: (value: number) => void }) {
@@ -73,14 +100,14 @@ function Plot({ points, width, height, left = 0, right, top, bottom, label, chil
 }
 
 function CapitalPlot({ data, period }: { data: Dashboard; period: number }) {
-  const mobile = useSyncExternalStore(subscribeMobile, getMobile);
+  const mobile = useSyncExternalStore(mobileQuery.subscribe, mobileQuery.getSnapshot);
+  const { frameRef, size } = useWidePlotFrame();
   const range = periodRange(period, today());
   const history = data.history.filter(point => point.date >= range.start && point.date <= range.end);
   const amounts = history.flatMap(point => point.total === null ? [] : [point.total]);
   if (!amounts.length) return <p className="chart-empty">Нет данных за выбранный период</p>;
 
-  const width = mobile ? 320 : 680, height = mobile ? 153 : 213;
-  const left = mobile ? 3 : 4, right = mobile ? 269 : 623, top = mobile ? 13 : 16, bottom = mobile ? 128 : 184;
+  const { width, height, left, right, top, bottom, valueLabelX, dateLabelY } = capitalPlotBounds(size, mobile);
   const lowest = Math.min(...amounts), highest = Math.max(...amounts);
   const padding = Math.max((highest - lowest) * 0.07, highest * 0.01, 1);
   const minimum = Math.max(0, lowest - padding), maximum = highest + padding;
@@ -99,19 +126,19 @@ function CapitalPlot({ data, period }: { data: Dashboard; period: number }) {
     inSegment = true;
   }
   const endpoint = segments.at(-1)!.at(-1)!;
-  return <Plot key={period} points={points} width={width} height={height} left={left} right={right} top={top} bottom={bottom}
+  return <div className="capital-plot-frame" ref={frameRef}><Plot key={period} points={points} width={width} height={height} left={left} right={right} top={top} bottom={bottom}
     label={`Капитал с ${dateLabel(range.start, true)} по ${dateLabel(range.end, true)}`}>
     {[0, 0.5, 1].map(fraction => {
       const y = top + (bottom - top) * fraction;
-      return <g key={fraction}><line className="chart-grid" x1={left} x2={right} y1={y} y2={y} /><text className="chart-label" x={right + 8} y={y + 4}>{compact.format(maximum - (maximum - minimum) * fraction)}</text></g>;
+      return <g key={fraction}><line className="chart-grid" x1={left} x2={right} y1={y} y2={y} /><text className="chart-label" x={valueLabelX} y={y + 4}>{compact.format(maximum - (maximum - minimum) * fraction)}</text></g>;
     })}
     {segments.map(segment => {
       const line = 'M' + segment.map(({ x, y }) => `${x},${y}`).join('L');
       return <g key={segment[0].x}><path className="chart-area" d={`${line}L${segment.at(-1)!.x},${bottom}H${segment[0].x}Z`} /><path className="chart-line" d={line} /></g>;
     })}
     {(mobile || points.length === 1) && <circle className="chart-end" cx={endpoint.x} cy={endpoint.y!} r="3.6" />}
-    <AxisLabels labels={axis.labels} y={height - 5} offset={left} />
-  </Plot>;
+    <AxisLabels labels={axis.labels} y={dateLabelY} offset={left} />
+  </Plot></div>;
 }
 
 export function Capital({ data, hidden }: { data: Dashboard; hidden: boolean }) {
@@ -176,9 +203,10 @@ const percent = (value: number | null) => value === null ? 'Нет данных 
 type ExchangeWindow = { range: { start: string; end: string }; points: Quote[]; changePercent: number | null; observations: number; latestQuote: Quote | null };
 
 function RateChart({ series, row, base, period, hidden }: { series: QuoteSeries; row: Allocation; base: string; period: number; hidden: boolean }) {
-  const mobile = useSyncExternalStore(subscribeMobile, getMobile);
+  const mobile = useSyncExternalStore(mobileQuery.subscribe, mobileQuery.getSnapshot);
+  const { frameRef, size } = useWidePlotFrame();
   const window: ExchangeWindow = rateWindow(series.points, period, today());
-  const width = mobile ? 360 : 640, right = width - 120;
+  const width = size?.width ?? (mobile ? 360 : 640), right = width - 120;
   const geometry = rateGeometry(window.points, width, window.range);
   const last = window.points.at(-1);
   const pair = `${row.currency} / ${base}`;
@@ -188,14 +216,14 @@ function RateChart({ series, row, base, period, hidden }: { series: QuoteSeries;
       <div className="fx-quote"><strong className="ui-number">{quoteNumber(row.rate)}{row.rate !== null && ` ${base}`}</strong><small>за 1 {row.currency}{row.rate !== null && last?.rateDate && ` · курс от ${dateLabel(last.rateDate)}`}</small></div>
     </div>
     <div className="fx-row-body">
-      {geometry ? <Plot key={period} points={geometry.positions.map((point: {x: number; y: number | null}, index: number) => ({
+      <div className="fx-plot-frame" ref={frameRef}>{geometry ? <Plot key={period} points={geometry.positions.map((point: {x: number; y: number | null}, index: number) => ({
         x: point.x, y: point.y, label: dateLabel(window.points[index].date, true),
         value: point.y === null ? 'Нет курса' : `${quoteNumber(window.points[index].rate)} ${base}${window.points[index].rateDate && window.points[index].rateDate !== window.points[index].date ? ` · курс от ${dateLabel(window.points[index].rateDate!)}` : ''}`,
       }))} width={width} height={164} right={right} top={12} bottom={128} label={`${pair}: ${dateLabel(window.range.start, true)} — ${dateLabel(window.range.end, true)}`}>
         {geometry.ticks.map(tick => <g key={tick.y}><line className="chart-grid" x1="0" x2={right} y1={tick.y} y2={tick.y} /><text className="chart-label" x={right + 12} y={tick.y + 4}>{quoteNumber(tick.value, 4)}</text></g>)}
         <path className="chart-line" d={geometry.path} /><circle className="chart-end" cx={geometry.endpoint?.x} cy={geometry.endpoint?.y ?? undefined} r="4" />
         <AxisLabels labels={geometry.labels} y={160} />
-      </Plot> : <p className="chart-empty">Для этой пары пока нет курсов за выбранный период.</p>}
+      </Plot> : <p className="chart-empty">Для этой пары пока нет курсов за выбранный период.</p>}</div>
       <dl className="fx-metrics"><div><dt>Изменение курса</dt><dd className={signClass(window.changePercent)}>{percent(window.changePercent)}</dd>{last && <small>{dateLabel(window.points[0].date)} — {dateLabel(last.date)}</small>}</div>
         <div><dt>Вклад в переоценку</dt><dd className={signClass(row.fx, hidden)}>{signed(row.fx, base, hidden)}</dd></div>
       </dl>

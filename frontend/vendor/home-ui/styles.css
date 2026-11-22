@@ -23,7 +23,6 @@
   --ui-danger: #963a38;
   --ui-positive: #2a6449;
   --ui-radius: 12px;
-  --ui-width: 1040px;
   min-height: 100dvh; color: var(--ui-text); background: var(--ui-surface);
   font: 14px/1.55 Onest, system-ui, sans-serif;
   color-scheme: light;
@@ -37,7 +36,7 @@
 .home-ui :is(button, input, select, textarea) { font: inherit; color: inherit; }
 .home-ui :is(a, button, input, select, textarea, summary):focus-visible { outline: 2px solid var(--ui-accent); outline-offset: 3px; }
 .home-ui ::selection { background: var(--ui-tint); color: var(--ui-text); }
-.home-ui[data-home-theme="ration"] { --ui-accent: #89543c; --ui-raised: #fcf7f3; --ui-input: #f9f6f3; --ui-tint: #f9efe9; --ui-width: 900px; }
+.home-ui[data-home-theme="ration"] { --ui-accent: #89543c; --ui-raised: #fcf7f3; --ui-input: #f9f6f3; --ui-tint: #f9efe9; }
 .home-ui[data-home-theme="svod"] { --ui-accent: #7a5a18; --ui-raised: #faf6e9; --ui-tint: #fff3d7; }
 .home-ui[data-home-theme="vault"] { --ui-accent: #64575c; --ui-raised: #f5f4f2; --ui-tint: #f5eff1; }
 .home-ui[data-home-theme="portfolio"] { --ui-accent: #386853; --ui-raised: #f1f7f4; --ui-tint: #e9f4ed; }
@@ -54,7 +53,7 @@
     --ui-danger: #f39891; --ui-positive: #a8cdb6; color-scheme: dark;
   }
 }
-.ui-container { width: min(var(--ui-width), calc(100% - 88px)); margin-inline: auto; }
+.ui-container { width: calc(100% - 2 * clamp(18px, 2.4vw, 64px)); margin-inline: auto; }
 .ui-main { padding-block: 39px 44px; }
 .ui-bar { border-bottom: 1px solid var(--ui-line); }
 .ui-toolbar { min-height: 60px; display: grid; grid-template-columns: minmax(110px, 1fr) auto minmax(110px, 1fr); align-items: center; gap: 16px; }
