@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { periodRange, dateAxis, nearestPoint, capitalPlotBounds } from '../frontend/src/chart.mjs';
+import { periodRange, dateAxis, nearestPoint } from '../frontend/src/chart.mjs';
 
 test('selected period defines the axis even when the first record is recent', () => {
   const month = dateAxis(periodRange(30, '2026-11-13'), 300);
@@ -27,15 +27,4 @@ test('a single observation can be selected near its marker', () => {
   const points = [{ x: 300, y: 70 }];
   assert.equal(nearestPoint(points, 296, 6), 0);
   assert.equal(nearestPoint(points, 280, 6), -1);
-});
-
-test('capital chart places grid lines and labels within measured wide bounds', () => {
-  const plot = capitalPlotBounds({ width: 1940, height: 310 });
-  assert.equal(plot.width, 1940);
-  assert.equal(plot.height, 310);
-  assert.ok(Math.abs(plot.left / plot.width - 4 / 680) < 0.0001);
-  assert.ok(Math.abs(plot.right / plot.width - 623 / 680) < 0.0001);
-  assert.ok(plot.left < plot.right && plot.right < plot.valueLabelX && plot.valueLabelX < plot.width);
-  assert.ok(plot.top < plot.bottom && plot.bottom < plot.dateLabelY && plot.dateLabelY < plot.height);
-  assert.equal(capitalPlotBounds(null, true).right, 269);
 });

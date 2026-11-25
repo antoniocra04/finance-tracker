@@ -185,14 +185,6 @@ body { margin: 0; }
 .toast { position: fixed; inset: auto 16px 16px auto; max-width: calc(100% - 32px); padding: 10px 13px; background: #233a2b; color: #fff; border-radius: 7px; font: 14px Onest, system-ui, sans-serif; z-index: 2; }
 .toast-error { background: #78312a; }
 
-@media (min-width: 1100px) {
-  .finance-report { gap: clamp(28px, 2.8vw, 54px); grid-template-columns: minmax(0, 1fr) clamp(295px, 28vw, 405px); }
-  .account-list.preview { margin-top: 30px; }
-  .capital-plot-frame, .balance-summary > .chart-empty { height: clamp(233px, 16.4vw, 310px); }
-  .fx-plot-frame { height: 164px; }
-  :is(.capital-plot-frame, .fx-plot-frame) :is(.interactive-chart, .plot, .chart-empty) { height: 100%; }
-}
-
 @media (max-width: 900px) {
   .finance-report { grid-template-columns: minmax(0, 1.7fr) minmax(220px, 1fr); gap: 20px; }
   .balance-summary { padding: 15px; }
