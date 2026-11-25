@@ -1,13 +1,3 @@
-FROM --platform=$BUILDPLATFORM node:24-alpine AS frontend
-WORKDIR /src/frontend
-COPY frontend/package.json frontend/package-lock.json ./
-COPY frontend/vendor ./vendor
-RUN npm ci --no-audit --no-fund
-COPY frontend/index.html frontend/tsconfig.json frontend/vite.config.ts ./
-COPY frontend/public ./public
-COPY frontend/src ./src
-RUN npm run build
-
 FROM --platform=$BUILDPLATFORM golang:1.26.11-alpine AS build
 ARG TARGETOS
 ARG TARGETARCH
@@ -17,7 +7,7 @@ COPY go.mod go.sum ./
 RUN go mod download
 COPY *.go ./
 COPY internal/web/spa/spa.go ./internal/web/spa/
-COPY --from=frontend /src/internal/web/spa/static/generated ./internal/web/spa/static/generated
+COPY internal/web/spa/public ./internal/web/spa/public
 RUN CGO_ENABLED=0 GOOS="$TARGETOS" GOARCH="$TARGETARCH" go build -mod=readonly -trimpath -ldflags="-s -w" -o /out/svod .
 
 FROM alpine:3.23

@@ -8,4 +8,3 @@ backups/
 .DS_Store
 *.sqlite.lock
 /svod
-/internal/web/spa/static/generated/*

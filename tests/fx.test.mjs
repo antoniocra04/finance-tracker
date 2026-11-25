@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { rateWindow, rateGeometry } from '../frontend/src/fx.mjs';
+import { rateWindow, rateGeometry } from '../internal/web/spa/public/fx.mjs';
 
 test('quote windows carry past baselines, retain publication dates and never use future quotes', () => {
   const points = [

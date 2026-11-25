@@ -25,7 +25,7 @@ jobs:
         with:
           node-version: 24
           package-manager-cache: false
-      - run: npm --prefix frontend test
+      - run: node --test tests/*.test.mjs
       - run: docker compose config -q
       - run: docker compose build
       - name: Check image and export it for Raspberry Pi

@@ -40,7 +40,7 @@ Implementation defaults: keyboard navigation, visible focus, semantic controls, 
 
 ## Implementation Choices
 
-User requested worldwide currency selection, initially USD, RUB, KZT. Default reporting currency is RUB, changeable in settings. No bank credentials or bank integrations. One owner password. Go with SQLite, an embedded React and TypeScript interface, and Docker for an ARM64 Raspberry Pi.
+User requested worldwide currency selection, initially USD, RUB, KZT. Default reporting currency is RUB, changeable in settings. No bank credentials or bank integrations. One owner password. Go with SQLite, an embedded JavaScript interface, and Docker for an ARM64 Raspberry Pi.
 
 ## Anti-references
 
